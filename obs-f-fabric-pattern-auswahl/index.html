@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<!-- Version: 1.0.0 -->
+<!-- Changelog:
+  v1.0.0 (18.02.2026) - Initial: obs-f Guide als HTML mit Mermaid + Prism.js
+-->
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>obs-f - Obsidian Vault Analyse mit Fabric Pattern-Auswahl</title>
+
+    <!-- OG Tags -->
+    <meta property="og:title" content="obs-f - Obsidian Vault Analyse mit Fabric Pattern-Auswahl">
+    <meta property="og:description" content="8 Shell-Funktionen, 28 Fabric Patterns, FZF-Menues, Claude Code Handoff. Komplette technische Anleitung zum Nachbauen.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://holgergelhausen.github.io/vortraege/obs-f-fabric-pattern-auswahl/">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Prism.js - Dark Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* --- Layout --- */
+        .page-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .page-header a {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .page-header a:hover {
+            text-decoration: underline;
+        }
+
+        .page-header img {
+            height: 32px;
+            width: auto;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* --- TOC --- */
+        .toc {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .toc-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.8rem;
+        }
+
+        .toc ol {
+            list-style: none;
+            counter-reset: toc;
+            padding: 0;
+        }
+
+        .toc > ol > li {
+            counter-increment: toc;
+            margin-bottom: 0.3rem;
+        }
+
+        .toc > ol > li::before {
+            content: counter(toc) ".";
+            color: #484f58;
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .toc a {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Article Title --- */
+        .article-title {
+            margin-bottom: 0.5rem;
+        }
+
+        .article-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .article-meta {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .article-meta strong {
+            color: #e6edf3;
+        }
+
+        /* --- Content --- */
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #21262d;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-top: 1.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.88em;
+            background: #1c2128;
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            color: #f0883e;
+        }
+
+        pre {
+            margin-bottom: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+            font-size: 0.85rem;
+        }
+
+        pre[class*="language-"] {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 1rem 1.2rem;
+        }
+
+        /* --- Tables --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(22, 27, 34, 0.5);
+        }
+
+        /* --- Mermaid --- */
+        .mermaid {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        /* --- Lists --- */
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.3rem;
+        }
+
+        /* --- Horizontal Rule --- */
+        hr {
+            border: none;
+            border-top: 1px solid #21262d;
+            margin: 2.5rem 0;
+        }
+
+        /* --- Blockquote (used for info boxes) --- */
+        .info-box {
+            background: #161b22;
+            border-left: 4px solid #58a6ff;
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        /* --- ASCII Diagram --- */
+        .ascii-diagram {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre;
+            line-height: 1.5;
+            color: #8b949e;
+        }
+
+        /* --- Footer --- */
+        .article-footer {
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #21262d;
+            text-align: center;
+            color: #484f58;
+            font-size: 0.8rem;
+        }
+
+        .article-footer a {
+            color: #58a6ff;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 600px) {
+            .article-title h1 {
+                font-size: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+
+            pre[class*="language-"] {
+                padding: 0.8rem;
+                font-size: 0.78rem;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 0.4rem 0.5rem;
+            }
+
+            .mermaid {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sticky Header -->
+<div class="page-header">
+    <div class="page-header-inner">
+        <a href="../">&#8592; Alle Vortraege</a>
+        <a href="../">
+            <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png" alt="AI Performance Academy">
+        </a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Title -->
+    <div class="article-title">
+        <h1>obs-f &mdash; Obsidian Vault Analyse mit Fabric Pattern-Auswahl</h1>
+    </div>
+    <div class="article-meta">
+        <strong>Quelldatei:</strong> <code>~/.zsh/functions/obsidian-vaults.zsh</code> v5.8.0<br>
+        <strong>8 Shell-Funktionen</strong> | <strong>28 kuratierte Patterns</strong> | <strong>5 Rezept-Kategorien</strong>
+    </div>
+
+    <!-- TOC -->
+    <nav class="toc">
+        <div class="toc-title">Inhalt</div>
+        <ol>
+            <li><a href="#was-macht-obs-f">Was macht obs-f?</a></li>
+            <li><a href="#gesamtfluss">Gesamtfluss als Diagramm</a></li>
+            <li><a href="#grundlagen">Grundlagen fuer Anfaenger</a></li>
+            <li><a href="#funktionen-ueberblick">Alle Shell-Funktionen im Ueberblick</a></li>
+            <li><a href="#fn1-obs-f">Funktion 1: obs-f &ndash; Hauptfunktion</a></li>
+            <li><a href="#fn2-collect">Funktion 2: _obs_f_collect &ndash; Dateien sammeln</a></li>
+            <li><a href="#fn3-pick-pattern">Funktion 3: _obs_f_pick_fabric_pattern &ndash; Pattern waehlen</a></li>
+            <li><a href="#fn4-run">Funktion 4: _obs_f_run &ndash; Batch-Modus</a></li>
+            <li><a href="#fn5-handoff">Funktion 5: _obs_f_claude_handoff &ndash; Claude Code Uebergabe</a></li>
+            <li><a href="#fn6-single">Funktion 6: _obs_f_single &ndash; Einzeldatei-Modus</a></li>
+            <li><a href="#fn7-pick-file">Funktion 7: _obs_f_pick_file &ndash; Datei waehlen</a></li>
+            <li><a href="#fn8-pick-tag">Funktion 8: _obs_f_pick_tag &ndash; Tag/Ordner-Filter</a></li>
+            <li><a href="#eigene-patterns">Eigene Patterns hinzufuegen</a></li>
+            <li><a href="#globale-variablen">Globale Variablen</a></li>
+            <li><a href="#minimal-setup">Minimal-Setup zum Nachbauen</a></li>
+            <li><a href="#datei-uebersicht">Datei-Uebersicht</a></li>
+        </ol>
+    </nav>
+
+    <!-- === CONTENT START === -->
+
+    <h2 id="was-macht-obs-f">Was macht obs-f?</h2>
+
+    <p><code>obs-f</code> ist ein Kommandozeilen-Tool, das du im Terminal tippst. Es macht 5 Dinge nacheinander:</p>
+
+    <div class="ascii-diagram">obs-f
+  |
+  +-- 1. Rezept-Menue (FZF)     -> WELCHE Dateien aus deinem Obsidian Vault?
+  |
+  +-- 2. Pattern-Menue (FZF)    -> WAS soll Fabric damit machen?
+  |
+  +-- 3. Fabric laeuft           -> AI analysiert die Dateien (Ausgabe: Deutsch)
+  |
+  +-- 4. Output anzeigen         -> Du liest das Ergebnis im Terminal
+  |
+  +-- 5. Claude Handoff [j/N]    -> Optional: Claude Code uebernimmt</div>
+
+    <hr>
+
+    <h2 id="gesamtfluss">Gesamtfluss als Diagramm</h2>
+
+    <div class="mermaid">
+flowchart TD
+    A["obs-f im Terminal tippen"] --> B["Rezept-Menue (FZF)"]
+    B --> C{"Welcher Modus?"}
+    C -->|"HEUTE/WOCHE/BATCH"| D["_obs_f_collect\nDateien sammeln"]
+    C -->|"EINZELN"| E["_obs_f_pick_file\nDatei waehlen"]
+    C -->|"__CMD__"| F["Shell-Befehl\nausfuehren"]
+    D --> G["_obs_f_pick_fabric_pattern\nPattern-Menue (FZF)"]
+    E --> G
+    G --> H["Fabric AI\nAnalyse auf Deutsch"]
+    H --> I["Output im Terminal\nanzeigen"]
+    I --> J{"Weiter mit\nClaude Code?"}
+    J -->|"j"| K["_obs_f_claude_handoff\nKontext-Datei schreiben\nClaude Code starten"]
+    J -->|"N"| L["Fertig"]
+    </div>
+
+    <hr>
+
+    <h2 id="grundlagen">Grundlagen fuer Anfaenger</h2>
+
+    <h3>Was ist eine Shell-Funktion?</h3>
+
+    <p>Eine Shell-Funktion ist ein wiederverwendbarer Code-Block in deinem Terminal. Statt lange Befehle zu tippen, gibst du nur den Funktionsnamen ein:</p>
+
+    <pre><code class="language-bash"># Definition (in deiner .zshrc oder einer extra Datei)
+meine_funktion() {
+    echo "Hallo Welt"
+}
+
+# Aufruf
+meine_funktion
+# Ausgabe: Hallo Welt</code></pre>
+
+    <p>Funktionen, die mit <code>_</code> beginnen (z.B. <code>_obs_f_run</code>), sind <strong>Helper</strong> &ndash; sie werden nicht direkt aufgerufen, sondern von anderen Funktionen benutzt.</p>
+
+    <h3>Was ist FZF?</h3>
+
+    <p><strong>FZF</strong> (Fuzzy Finder) ist ein Terminal-Tool, das interaktive Auswahl-Menues erzeugt. Du kennst Dropdown-Menues aus Websites &ndash; FZF ist das Gleiche, aber im Terminal.</p>
+
+    <pre><code class="language-bash"># Installation
+brew install fzf
+
+# Einfachstes Beispiel: Datei waehlen
+ls | fzf
+
+# Mit Preview (zeigt Dateiinhalt rechts)
+ls | fzf --preview="cat {}" --preview-window=right:50%</code></pre>
+
+    <p><strong>Wichtige FZF-Flags, die obs-f nutzt:</strong></p>
+
+    <table>
+        <thead><tr><th>Flag</th><th>Was es tut</th><th>Beispiel</th></tr></thead>
+        <tbody>
+            <tr><td><code>--prompt</code></td><td>Text vor dem Suchfeld</td><td><code>--prompt="waehle > "</code></td></tr>
+            <tr><td><code>--header</code></td><td>Ueberschrift oben im Menue</td><td><code>--header="Fabric Patterns"</code></td></tr>
+            <tr><td><code>--preview</code></td><td>Shell-Befehl, der rechts ausgefuehrt wird</td><td><code>--preview="cat {}"</code></td></tr>
+            <tr><td><code>--preview-window</code></td><td>Wo/wie gross die Preview ist</td><td><code>--preview-window=right:50%:wrap</code></td></tr>
+            <tr><td><code>--height</code></td><td>Wie viel Terminal-Hoehe FZF nutzt</td><td><code>--height=80%</code></td></tr>
+            <tr><td><code>--border</code></td><td>Rahmen um das Menue</td><td><code>--border=rounded</code></td></tr>
+            <tr><td><code>--no-multi</code></td><td>Nur 1 Auswahl erlaubt (kein Multi-Select)</td><td><code>--no-multi</code></td></tr>
+            <tr><td><code>--reverse</code></td><td>Liste von oben nach unten</td><td><code>--reverse</code></td></tr>
+            <tr><td><code>--ansi</code></td><td>Farbcodes in der Liste erlauben</td><td><code>--ansi</code></td></tr>
+            <tr><td><code>--delimiter</code></td><td>Trennzeichen fuer Spalten</td><td><code>--delimiter='|'</code></td></tr>
+            <tr><td><code>--with-nth</code></td><td>Nur bestimmte Spalten anzeigen</td><td><code>--with-nth=2</code></td></tr>
+            <tr><td><code>--no-info</code></td><td>Keine Zaehler-Zeile unten</td><td><code>--no-info</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Was ist Fabric?</h3>
+
+    <p><strong>Fabric</strong> ist ein CLI-Tool von Daniel Miessler. Es hat ueber 200 vordefinierte AI-Analyse-Patterns. Jedes Pattern ist ein Ordner mit einer <code>system.md</code> Datei &ndash; einem System-Prompt.</p>
+
+    <pre><code class="language-bash"># Installation
+go install github.com/danielmiessler/fabric@latest
+# oder auf macOS:
+brew install fabric-ai
+
+# Einfachstes Beispiel: Text zusammenfassen
+echo "Langer Text..." | fabric -p summarize
+
+# Pattern-Liste anzeigen
+ls ~/.config/fabric/patterns/</code></pre>
+
+    <p><strong>Wie ein Pattern aufgebaut ist:</strong></p>
+
+    <pre><code class="language-text">~/.config/fabric/patterns/
+  extract_wisdom/
+    system.md          &larr; Das ist der System-Prompt
+  summarize/
+    system.md
+  analyze_prose/
+    system.md
+  ... (239 weitere)</code></pre>
+
+    <p>Die <code>system.md</code> enthaelt Anweisungen fuer die AI, z.B.:</p>
+
+    <pre><code class="language-markdown"># IDENTITY and PURPOSE
+You are a wisdom extraction service...
+
+# STEPS
+1. Extract surprising insights
+2. Find the most important ideas
+...
+
+# OUTPUT FORMAT
+- Use markdown
+- Section: IDEAS, INSIGHTS, QUOTES...</code></pre>
+
+    <h3>Was ist ein Heredoc?</h3>
+
+    <p>Ein Heredoc (<code>&lt;&lt;EOF ... EOF</code>) schreibt mehrzeiligen Text in eine Datei oder Variable. obs-f nutzt es fuer die Kontext-Datei:</p>
+
+    <pre><code class="language-bash">cat > datei.md &lt;&lt;EOF
+# Ueberschrift
+Inhalt mit $variablen die ersetzt werden.
+EOF</code></pre>
+
+    <h3>Was ist eine Pipe?</h3>
+
+    <p>Die Pipe (<code>|</code>) schickt die Ausgabe eines Befehls als Eingabe an den naechsten:</p>
+
+    <pre><code class="language-bash"># Dateien sammeln -> an Fabric schicken
+cat datei1.md datei2.md | fabric -p summarize
+#     ^ Output              ^ wird hier Input</code></pre>
+
+    <h3>Was ist Obsidian CLI?</h3>
+
+    <p><strong>Obsidian CLI</strong> ist eine Kommandozeilen-Schnittstelle, die ab Obsidian v1.12 verfuegbar ist. Sie erlaubt dir, JavaScript direkt in Obsidians Metadata Cache auszufuehren &ndash; also Dateien, Tags und Frontmatter abzufragen, ohne das Dateisystem direkt durchsuchen zu muessen.</p>
+
+    <p><strong>Warum ist das wichtig fuer obs-f?</strong> Obsidian hat einen internen Cache aller Dateien mit Metadaten (Tags, Frontmatter, Aenderungsdatum). Ueber die CLI kann obs-f diesen Cache in Millisekunden abfragen, statt tausende Dateien per <code>find</code> zu durchsuchen.</p>
+
+    <h4>Installation</h4>
+
+    <p><strong>Voraussetzung:</strong> Obsidian v1.12 oder neuer.</p>
+
+    <p><strong>macOS (einmalig):</strong></p>
+
+    <pre><code class="language-bash"># Obsidian-Binary zum PATH hinzufuegen
+echo 'export PATH="/Applications/Obsidian.app/Contents/MacOS:$PATH"' >> ~/.zprofile
+
+# Terminal neu starten oder:
+source ~/.zprofile
+
+# Testen
+obsidian --version</code></pre>
+
+    <p><strong>Linux:</strong></p>
+
+    <pre><code class="language-bash"># AppImage: Obsidian binary ist im AppImage enthalten
+# Flatpak: flatpak run md.obsidian.Obsidian --help
+echo 'alias obsidian="/pfad/zu/obsidian"' >> ~/.bashrc</code></pre>
+
+    <h4>Wie obs-f die CLI nutzt</h4>
+
+    <p>obs-f verwendet den <code>eval</code>-Befehl, um JavaScript in Obsidian auszufuehren:</p>
+
+    <pre><code class="language-bash"># Grundsyntax
+obsidian eval --vault "MeinVault" --code 'JavaScript-Code'
+
+# Beispiel: Alle heutigen Markdown-Dateien auflisten
+obsidian eval --vault "Akademie" --code 'JSON.stringify(
+    app.vault.getFiles()
+        .filter(f => f.extension === "md" && f.stat.mtime > Date.now() - 86400000)
+        .map(f => f.path)
+)'</code></pre>
+
+    <p><strong>Wichtige Objekte im eval-Kontext:</strong></p>
+
+    <table>
+        <thead><tr><th>Objekt</th><th>Zugriff auf</th><th>Beispiel</th></tr></thead>
+        <tbody>
+            <tr><td><code>app.vault</code></td><td>Alle Dateien im Vault</td><td><code>app.vault.getFiles()</code></td></tr>
+            <tr><td><code>app.metadataCache</code></td><td>Tags, Frontmatter, Links</td><td><code>app.metadataCache.getTags()</code></td></tr>
+            <tr><td><code>f.stat.mtime</code></td><td>Aenderungszeitpunkt (Unix-ms)</td><td><code>f.stat.mtime > 1708300800000</code></td></tr>
+            <tr><td><code>f.extension</code></td><td>Dateiendung</td><td><code>f.extension === 'md'</code></td></tr>
+            <tr><td><code>f.path</code></td><td>Relativer Pfad im Vault</td><td><code>f.path.includes('Marketing')</code></td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>Der <code>_obs_eval</code> Helper:</strong></p>
+
+    <p>obs-f kapselt den CLI-Aufruf in einen Helper:</p>
+
+    <pre><code class="language-bash">_obs_eval() {
+    local vault="$1" code="$2"
+    # obsidian eval aufrufen, Ergebnis zurueckgeben
+    obsidian eval --vault "$(basename "$vault")" --code "$code" 2>/dev/null
+}</code></pre>
+
+    <p>Wenn Obsidian CLI nicht verfuegbar ist (z.B. aeltere Version), faellt obs-f automatisch auf Filesystem-Suche mit <code>find</code> zurueck (siehe Funktion 2).</p>
+
+    <h4>Obsidian CLI Diagramm</h4>
+
+    <div class="mermaid">
+flowchart LR
+    A["obs-f Funktion"] --> B["_obs_eval Helper"]
+    B --> C["obsidian eval --vault --code"]
+    C --> D["Obsidian Metadata Cache"]
+    D --> E["JSON-Array mit Dateipfaden"]
+    E --> F["obs-f verarbeitet Ergebnis"]
+
+    style D fill:#e6f3ff,stroke:#0066cc,stroke-width:2px
+    </div>
+
+    <hr>
+
+    <h2 id="funktionen-ueberblick">Alle Shell-Funktionen im Ueberblick</h2>
+
+    <p>obs-f besteht aus <strong>8 Funktionen</strong>. Hier ist die Aufruf-Hierarchie:</p>
+
+    <div class="ascii-diagram">obs-f()                          &larr; Hauptfunktion (du tippst das)
+  |
+  +-- _obs_f_pick_tag()           &larr; Tag/Ordner-Filter per FZF
+  |
+  +-- _obs_f_single()             &larr; Einzeldatei-Modus
+  |   +-- _obs_f_pick_file()      &larr; Datei waehlen per FZF
+  |   +-- _obs_f_pick_fabric_pattern()  &larr; Pattern waehlen per FZF
+  |   +-- _obs_f_claude_handoff() &larr; Claude Code Uebergabe
+  |
+  +-- _obs_f_run()                &larr; Batch-Modus (mehrere Dateien)
+      +-- _obs_f_collect()        &larr; Dateien nach Zeit/Filter sammeln
+      +-- _obs_f_pick_fabric_pattern()  &larr; Pattern waehlen per FZF
+      +-- _obs_f_claude_handoff() &larr; Claude Code Uebergabe</div>
+
+    <h3>Funktions-Hierarchie als Diagramm</h3>
+
+    <div class="mermaid">
+flowchart TD
+    OBS["obs-f\nHauptfunktion"] --> TAG["_obs_f_pick_tag\nTag/Ordner-Filter"]
+    OBS --> SINGLE["_obs_f_single\nEinzeldatei-Modus"]
+    OBS --> RUN["_obs_f_run\nBatch-Modus"]
+
+    SINGLE --> PICK["_obs_f_pick_file\nDatei waehlen"]
+    SINGLE --> PAT1["_obs_f_pick_fabric_pattern\nPattern waehlen"]
+    SINGLE --> HAND1["_obs_f_claude_handoff\nClaude Uebergabe"]
+
+    RUN --> COLL["_obs_f_collect\nDateien sammeln"]
+    RUN --> PAT2["_obs_f_pick_fabric_pattern\nPattern waehlen"]
+    RUN --> HAND2["_obs_f_claude_handoff\nClaude Uebergabe"]
+
+    COLL --> EVAL["_obs_eval\nObsidian CLI"]
+
+    style OBS fill:#4CAF50,stroke:#2E7D32,color:#fff,stroke-width:3px
+    style PAT1 fill:#FF9800,stroke:#E65100,color:#fff
+    style PAT2 fill:#FF9800,stroke:#E65100,color:#fff
+    style HAND1 fill:#2196F3,stroke:#0D47A1,color:#fff
+    style HAND2 fill:#2196F3,stroke:#0D47A1,color:#fff
+    </div>
+
+    <hr>
+
+    <h2 id="fn1-obs-f">Funktion 1: <code>obs-f</code> &ndash; Hauptfunktion</h2>
+
+    <p><strong>Was sie tut:</strong> Zeigt das Rezept-Menue, parst die Auswahl und ruft den richtigen Helper auf.</p>
+
+    <p><strong>Aufgerufen durch:</strong> Dich im Terminal.</p>
+
+    <h3>Das Rezept-Array</h3>
+
+    <p>Das Herzstuck ist ein Array aus Pipe-getrennten Strings. Jeder String ist ein Rezept:</p>
+
+    <pre><code class="language-bash">local recipes=(
+    "HEUTE|Zusammenfassung|Alle heutigen Dateien zusammenfassen|today||summarize"
+    "HEUTE|Learnings|Key Insights von heute extrahieren|today||extract_wisdom"
+    "HEUTE|Nur Marketing|Heutige Marketing-Dateien|today|marketing|summarize"
+    "HEUTE|Nach Tag...|Tag waehlen -> heutige Dateien|today|__TAG__|summarize"
+    "WOCHE|Zusammenfassung|7-Tage Ueberblick|week||summarize"
+    "BATCH|Letzte 10|Die 10 neuesten zusammenfassen|recent||summarize|10"
+    "EINZELN|Datei -> Pattern|Datei waehlen, dann Pattern|__SINGLE__|||"
+    "CLAUDE|Heute|Claude Conversations von heute|today||summarize"
+    "VAULT|Conversations aufraeumen|obs-ai-digest --batch 10|__CMD__|obs-ai-digest --batch 10||"
+)</code></pre>
+
+    <p><strong>Format:</strong> <code>KATEGORIE|NAME|BESCHREIBUNG|MODUS|FILTER|PATTERN[|LIMIT]</code></p>
+
+    <table>
+        <thead><tr><th>Feld</th><th>Bedeutung</th><th>Beispielwerte</th></tr></thead>
+        <tbody>
+            <tr><td>KATEGORIE</td><td>Gruppe im FZF-Menue</td><td><code>HEUTE</code>, <code>WOCHE</code>, <code>BATCH</code>, <code>EINZELN</code>, <code>CLAUDE</code>, <code>VAULT</code></td></tr>
+            <tr><td>NAME</td><td>Anzeigename</td><td><code>Zusammenfassung</code>, <code>Learnings</code></td></tr>
+            <tr><td>BESCHREIBUNG</td><td>Erklaerungstext</td><td><code>Alle heutigen Dateien zusammenfassen</code></td></tr>
+            <tr><td>MODUS</td><td>Zeitfilter fuer <code>_obs_f_collect</code></td><td><code>today</code>, <code>week</code>, <code>recent</code>, <code>__SINGLE__</code>, <code>__CMD__</code></td></tr>
+            <tr><td>FILTER</td><td>Ordner- oder Tag-Filter</td><td>leer, <code>marketing</code>, <code>kurse</code>, <code>__TAG__</code></td></tr>
+            <tr><td>PATTERN</td><td>Fabric-Pattern (wird jetzt durch FZF ueberschrieben)</td><td><code>summarize</code>, <code>extract_wisdom</code></td></tr>
+            <tr><td>LIMIT</td><td>Max. Dateien (optional)</td><td><code>10</code>, <code>20</code></td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>Spezial-Modi:</strong></p>
+
+    <table>
+        <thead><tr><th>Modus</th><th>Verhalten</th></tr></thead>
+        <tbody>
+            <tr><td><code>__SINGLE__</code></td><td>Ruft <code>_obs_f_single()</code> auf &ndash; Einzeldatei-Modus</td></tr>
+            <tr><td><code>__CMD__</code></td><td>Fuehrt den FILTER-Wert als Shell-Befehl aus</td></tr>
+            <tr><td><code>__TAG__</code></td><td>Oeffnet <code>_obs_f_pick_tag()</code> zur Tag-Auswahl</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Das Display bauen</h3>
+
+    <p>Die Rezepte werden als formatierte Zeilen fuer FZF aufbereitet:</p>
+
+    <pre><code class="language-bash"># Feste Spaltenbreiten mit printf
+printf '  %-10s  %-24s  %s' "$cat" "$name" "$desc"
+# Ergibt z.B.: "  HEUTE       Zusammenfassung           Alle heutigen Dateien"</code></pre>
+
+    <p>Kategorien werden mit Trennlinien gruppiert:</p>
+
+    <pre><code class="language-bash">if [[ "$cat" != "$last_cat" ]]; then
+    display_lines+=("--- ${cat} ---")
+    last_cat="$cat"
+fi</code></pre>
+
+    <h3>Claude-Conversations-Schalter</h3>
+
+    <p>Die erste Zeile im Menue ist ein Toggle:</p>
+
+    <pre><code class="language-bash"># Zeile: Bei Enter wird der Schalter umgelegt und obs-f ruft sich selbst neu auf
+if [[ "$sel_cat" == "gear" ]]; then
+    if [[ "$include_claude" == "0" ]]; then
+        export _OBS_F_CLAUDE=1    # einschalten
+    else
+        export _OBS_F_CLAUDE=0    # ausschalten
+    fi
+    obs-f                         # Menue neu oeffnen
+    return $?
+fi</code></pre>
+
+    <h3>Rezept parsen</h3>
+
+    <p>Nach der FZF-Auswahl wird das Rezept in seine Bestandteile zerlegt:</p>
+
+    <pre><code class="language-bash"># Zsh parameter expansion: ${var%%|*} = alles VOR dem ersten |
+#                          ${var#*|}  = alles NACH dem ersten |
+
+local _r="$found_recipe"
+local _skip="${_r%%|*}"; _r="${_r#*|}"   # CAT (uebersprungen)
+_skip="${_r%%|*}"; _r="${_r#*|}"          # NAME (uebersprungen)
+_skip="${_r%%|*}"; _r="${_r#*|}"          # DESC (uebersprungen)
+local r_mode="${_r%%|*}"; _r="${_r#*|}"   # today/week/recent
+local r_filter="${_r%%|*}"; _r="${_r#*|}" # marketing/kurse/...
+local r_pattern="${_r%%|*}"               # summarize/extract_wisdom</code></pre>
+
+    <p><strong>Warum nicht einfach <code>IFS='|' read</code>?</strong> In Zsh funktioniert <code>IFS='|'</code> beim Splitting von Variablen anders als in Bash. Die <code>${var%%|*}</code> / <code>${var#*|}</code> Methode ist zuverlaessiger.</p>
+
+    <h3>FZF Spalten-Extraktion</h3>
+
+    <p>Da FZF die formatierte Zeile zurueckgibt, muessen Kategorie und Name per Zeichenposition extrahiert werden:</p>
+
+    <pre><code class="language-bash"># printf '  %-10s  %-24s  %s' erzeugt feste Spalten:
+# Zeichen  3-12 = Kategorie (10 Zeichen)
+# Zeichen 15-38 = Name (24 Zeichen)
+
+local sel_cat=$(echo "$selection" | cut -c3-12 | sed 's/[[:space:]]*$//')
+local sel_name=$(echo "$selection" | cut -c15-38 | sed 's/[[:space:]]*$//')</code></pre>
+
+    <p><code>sed 's/[[:space:]]*$//'</code> entfernt nachfolgende Leerzeichen.</p>
+
+    <hr>
+
+    <h2 id="fn2-collect">Funktion 2: <code>_obs_f_collect</code> &ndash; Dateien sammeln</h2>
+
+    <p><strong>Was sie tut:</strong> Liefert Dateipfade (eine pro Zeile) basierend auf Zeitraum und Filter.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>_obs_f_run()</code></p>
+
+    <p><strong>Parameter:</strong></p>
+
+    <table>
+        <thead><tr><th>#</th><th>Name</th><th>Werte</th><th>Beispiel</th></tr></thead>
+        <tbody>
+            <tr><td>$1</td><td>mode</td><td><code>today</code>, <code>week</code>, <code>recent</code></td><td><code>today</code></td></tr>
+            <tr><td>$2</td><td>filter</td><td>Ordnername oder Tag</td><td><code>marketing</code></td></tr>
+            <tr><td>$3</td><td>limit</td><td>Max. Dateien (fuer <code>recent</code>)</td><td><code>10</code></td></tr>
+            <tr><td>$4</td><td>include_claude</td><td><code>0</code>/<code>1</code>/<code>only</code></td><td><code>0</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Primaerer Weg: Obsidian CLI eval</h3>
+
+    <p>obs-f nutzt die Obsidian CLI (<code>obsidian://eval</code>), um direkt den Obsidian Metadata Cache abzufragen. Das ist schneller und praeziser als Filesystem-Suche:</p>
+
+    <pre><code class="language-bash"># JavaScript wird direkt in Obsidian ausgefuehrt
+local js_code="JSON.stringify(
+    app.vault.getFiles()
+        .filter(f =>
+            f.extension === 'md'
+            && !f.path.includes('_Archive')
+            && !f.path.includes('_templates')
+            && !f.path.includes('.obsidian')
+            ${js_claude_filter}      # Conversations ein/aus
+            ${js_time_filter}        # Heute/Woche/alle
+            ${js_path_filter}        # Ordner-Filter
+        )
+        .sort((a,b) => b.stat.mtime - a.stat.mtime)
+        ${js_limit}                  # .slice(0, N)
+        .map(f => f.path)
+)"
+
+# Ergebnis ist ein JSON-Array: ["path1.md", "path2.md", ...]
+local result=$(_obs_eval "$vault" "$js_code")</code></pre>
+
+    <p><strong>Zeitfilter (JavaScript):</strong></p>
+
+    <pre><code class="language-bash">case "$mode" in
+    today)
+        # Unix-Timestamp von heute 00:00 in Millisekunden
+        local today_start_ms=$(date -j -f "%Y-%m-%d %H:%M:%S" \
+            "$(date +%Y-%m-%d) 00:00:00" "+%s" 2>/dev/null)000
+        js_time_filter="&&f.stat.mtime>${today_start_ms}"
+        ;;
+    week)
+        local week_ms=$(( $(date +%s) - 7 * 86400 ))000
+        js_time_filter="&&f.stat.mtime>${week_ms}"
+        ;;
+esac</code></pre>
+
+    <p><strong>Ordner-Filter (JavaScript):</strong></p>
+
+    <pre><code class="language-bash">case "$filter" in
+    marketing)  js_path_filter="&&f.path.includes('20_Marketing')" ;;
+    kurse)      js_path_filter="&&f.path.includes('10_Kurse')" ;;
+    wissen)     js_path_filter="&&f.path.includes('30_Wissen')" ;;
+    strategie)  js_path_filter="&&f.path.includes('50_strategie')" ;;
+    *)
+        # Tag-basierter Filter via Metadata Cache
+        js_path_filter="&&(()=>{
+            const c=app.metadataCache.getFileCache(f);
+            const t=c?.frontmatter?.tags;
+            return Array.isArray(t)
+                ? t.some(x=>x.toLowerCase().includes('${filter}'))
+                : typeof t==='string' && t.includes('${filter}')
+        })()"
+        ;;
+esac</code></pre>
+
+    <h3>Fallback: Filesystem</h3>
+
+    <p>Wenn Obsidian CLI nicht verfuegbar ist, faellt obs-f auf <code>find</code> zurueck:</p>
+
+    <pre><code class="language-bash">case "$mode" in
+    today)
+        # macOS stat: Aenderungsdatum mit aktuellem Datum vergleichen
+        find "$vault" -name '*.md' -type f | while IFS= read -r ff; do
+            [[ "$(stat -f '%Sm' -t '%Y-%m-%d' "$ff")" == "$today" ]] && echo "$ff"
+        done
+        ;;
+    week)
+        find "$vault" -name '*.md' -type f -mtime -7
+        ;;
+    recent)
+        # stat: Unix-Timestamp + Pfad, sortieren, erste N nehmen
+        find "$vault" -name '*.md' -type f \
+            -exec stat -f '%m|%N' {} \; | sort -rn | head -${limit} | cut -d'|' -f2
+        ;;
+esac</code></pre>
+
+    <h3>Entscheidungsbaum von <code>_obs_f_collect</code></h3>
+
+    <div class="mermaid">
+flowchart TD
+    START["_obs_f_collect aufgerufen"] --> CLI{"Obsidian CLI\nverfuegbar?"}
+    CLI -->|"Ja"| EVAL["_obs_eval: JavaScript\nim Metadata Cache"]
+    CLI -->|"Nein"| FS["Fallback:\nFilesystem mit find"]
+
+    EVAL --> MODE{"mode Parameter?"}
+    FS --> MODE2{"mode Parameter?"}
+
+    MODE -->|"today"| T1["mtime > heute 00:00\nals Unix-ms"]
+    MODE -->|"week"| W1["mtime > vor 7 Tagen\nals Unix-ms"]
+    MODE -->|"recent"| R1["Alle Dateien\n.slice 0 bis limit"]
+
+    MODE2 -->|"today"| T2["stat Datum == heute"]
+    MODE2 -->|"week"| W2["find -mtime -7"]
+    MODE2 -->|"recent"| R2["stat + sort + head"]
+
+    T1 --> FILTER{"filter\ngesetzt?"}
+    W1 --> FILTER
+    R1 --> FILTER
+
+    FILTER -->|"Ordner"| PATH["path.includes\nz.B. 20_Marketing"]
+    FILTER -->|"Tag"| META["metadataCache\nfrontmatter.tags"]
+    FILTER -->|"Leer"| ALL["Alle passenden\nDateien"]
+
+    PATH --> OUT["JSON-Array\nmit Pfaden"]
+    META --> OUT
+    ALL --> OUT
+
+    style EVAL fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style FS fill:#FF9800,stroke:#E65100,color:#fff
+    </div>
+
+    <hr>
+
+    <h2 id="fn3-pick-pattern">Funktion 3: <code>_obs_f_pick_fabric_pattern</code> &ndash; Pattern waehlen</h2>
+
+    <p><strong>Was sie tut:</strong> Zeigt ein FZF-Menue mit 28 kuratierten Fabric-Patterns in 7 Kategorien. Rechts sieht man eine Preview der <code>system.md</code>.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>_obs_f_run()</code> und <code>_obs_f_single()</code></p>
+
+    <p><strong>Gibt zurueck:</strong> Den Pattern-Namen als String (z.B. <code>extract_wisdom</code>)</p>
+
+    <h3>Vollstaendiger Code</h3>
+
+    <pre><code class="language-bash">_obs_f_pick_fabric_pattern() {
+    local PATTERNS_DIR="$HOME/.config/fabric/patterns"
+
+    # Array mit 28 kuratierten Patterns + Kategorie-Headern
+    local -a CURATED=(
+        "-- ANALYSIEREN & ERKLAEREN ---|"
+        "extract_wisdom               | Weisheit, Ideen, Zitate, Gewohnheiten extrahieren"
+        "extract_insights             | Die 10 ueberraschendsten Kernerkenntnisse"
+        "analyze_prose                | Schreibqualitaet bewerten + Verbesserungsvorschlaege"
+        "analyze_claims               | Behauptungen auf Wahrheit pruefen (A-F Rating)"
+        "analyze_paper                | Wissenschaftliche Rigor-Analyse"
+        "analyze_presentation         | Praesentation reviewen und kritisch bewerten"
+        "analyze_tech_impact          | Technologie-Impact auf Gesellschaft analysieren"
+        "find_logical_fallacies       | Logikfehler und Fehlschluesse finden"
+        "explain_docs                 | Dokumentation verstaendlich erklaeren"
+        "explain_terms                | Glossar aller wichtigen Begriffe erstellen"
+        "rate_content                 | Inhalt bewerten + Qualitaets-Rating (1-10)"
+        "-- ZUSAMMENFASSEN ------------|"
+        "summarize                    | 1-Satz-Summary + 10 Hauptpunkte + 5 Takeaways"
+        "create_summary               | Strukturierte Markdown-Zusammenfassung"
+        "create_5_sentence_summary    | 5-Satz-Zusammenfassung"
+        "extract_core_message         | Kernbotschaft auf den Punkt"
+        "-- VERGLEICHEN ---------------|"
+        "compare_and_contrast         | Markdown-Tabelle: Gemeinsamkeiten & Unterschiede"
+        "-- CONTENT ERSTELLEN ---------|"
+        "write_essay                  | Essay im Paul-Graham-Stil"
+        "create_keynote               | Keynote/Praesentation erstellen"
+        "write_micro_essay            | Micro-Essay (< 300 Woerter)"
+        "improve_writing              | Text ueberarbeiten: Klarheit, Kohaerenz, Stil"
+        "enrich_blog_post             | Blog-Post anreichern und verbessern"
+        "create_newsletter_entry      | Newsletter-Abschnitt erstellen"
+        "-- EXTRAHIEREN ---------------|"
+        "extract_ideas                | 20-50 ueberraschende Ideen"
+        "extract_recommendations      | Handlungsempfehlungen"
+        "extract_questions            | Offene Fragen identifizieren"
+        "create_tags                  | Tags und Kategorien generieren"
+        "-- LERNEN --------------------|"
+        "create_flash_cards           | Lernkarten fuer Schluesselkonzepte"
+        "create_quiz                  | Quiz-Fragen zum Inhalt generieren"
+        "-- ALLE ----------------------|"
+        "ALLE_PATTERNS                | Alle Fabric Patterns durchsuchen"
+    )
+
+    local choice
+    choice=$(printf '%s\n' "${CURATED[@]}" | fzf \
+        --prompt="Pattern waehlen > " \
+        --header="Fabric Pattern fuer die Analyse" \
+        --preview='p=$(echo {} | awk "{print \$1}");
+                  f="'"$PATTERNS_DIR"'/$p/system.md";
+                  if [[ -f "$f" ]]; then
+                    printf "\033[1;33m-- %s --\033[0m\n\n" "$p"
+                    head -30 "$f"
+                  else
+                    echo "Kategorie-Header"
+                  fi' \
+        --preview-window=right:50%:wrap \
+        --height=80% \
+        --border=rounded \
+        --no-multi)
+
+    [[ -z "$choice" ]] && return 1
+
+    local selected
+    selected=$(echo "$choice" | awk '{print $1}')
+
+    # Kategorie-Header abfangen (beginnen mit --)
+    [[ "$selected" == "--" ]] && return 1
+
+    # ALLE_PATTERNS: Zweites FZF mit dem kompletten Katalog
+    if [[ "$selected" == "ALLE_PATTERNS" ]]; then
+        selected=$(ls "$PATTERNS_DIR" | fzf \
+            --prompt="Pattern suchen > " \
+            --header="Alle Fabric Patterns durchsuchen" \
+            --preview='f="'"$PATTERNS_DIR"'/{}/system.md";
+                      if [[ -f "$f" ]]; then
+                        printf "\033[1;33m-- {} --\033[0m\n\n"
+                        head -30 "$f"
+                      else
+                        echo "Keine system.md gefunden"
+                      fi' \
+            --preview-window=right:50%:wrap \
+            --height=80% \
+            --border=rounded \
+            --no-multi)
+        [[ -z "$selected" ]] && return 1
+    fi
+
+    echo "$selected"
+}</code></pre>
+
+    <h3>Die 7 Pattern-Kategorien</h3>
+
+    <div class="mermaid">
+mindmap
+  root((Fabric Patterns))
+    Analysieren
+      extract_wisdom
+      extract_insights
+      analyze_prose
+      analyze_claims
+      find_logical_fallacies
+      rate_content
+    Zusammenfassen
+      summarize
+      create_summary
+      create_5_sentence_summary
+      extract_core_message
+    Vergleichen
+      compare_and_contrast
+    Content Erstellen
+      write_essay
+      create_keynote
+      improve_writing
+      enrich_blog_post
+    Extrahieren
+      extract_ideas
+      extract_recommendations
+      extract_questions
+      create_tags
+    Lernen
+      create_flash_cards
+      create_quiz
+    Alle
+      ALLE_PATTERNS
+    </div>
+
+    <h3>Wie die FZF Preview funktioniert</h3>
+
+    <p>Der <code>--preview</code>-Befehl ist ein Shell-Script, das fuer jede Zeile ausgefuehrt wird:</p>
+
+    <pre><code class="language-bash"># {} wird durch die aktuelle FZF-Zeile ersetzt, z.B.:
+# "extract_wisdom               | Weisheit, Ideen, Zitate extrahieren"
+
+# Schritt 1: Erstes Wort extrahieren (= Pattern-Name)
+p=$(echo {} | awk "{print \$1}")
+# p = "extract_wisdom"
+
+# Schritt 2: Pfad zur system.md bauen
+f="~/.config/fabric/patterns/$p/system.md"
+
+# Schritt 3: Wenn Datei existiert, die ersten 30 Zeilen anzeigen
+if [[ -f "$f" ]]; then
+    head -30 "$f"
+else
+    echo "Kategorie-Header"  # fuer ---Zeilen
+fi</code></pre>
+
+    <h3>Warum <code>awk '{print $1}'</code>?</h3>
+
+    <p>Jede CURATED-Zeile sieht so aus:</p>
+
+    <pre><code class="language-text">extract_wisdom               | Weisheit, Ideen, Zitate extrahieren</code></pre>
+
+    <p><code>awk '{print $1}'</code> nimmt das erste durch Whitespace getrennte Wort: <code>extract_wisdom</code>. Die Beschreibung nach <code>|</code> wird ignoriert.</p>
+
+    <hr>
+
+    <h2 id="fn4-run">Funktion 4: <code>_obs_f_run</code> &ndash; Batch-Modus</h2>
+
+    <p><strong>Was sie tut:</strong> Sammelt Dateien, oeffnet Pattern-FZF, laesst Fabric laufen, bietet Claude Handoff an.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>obs-f()</code> (fuer alle Batch-Rezepte)</p>
+
+    <p><strong>Parameter:</strong></p>
+
+    <table>
+        <thead><tr><th>#</th><th>Name</th><th>Bedeutung</th><th>Beispiel</th></tr></thead>
+        <tbody>
+            <tr><td>$1</td><td>mode</td><td>Zeitfilter</td><td><code>today</code></td></tr>
+            <tr><td>$2</td><td>filter</td><td>Ordner/Tag-Filter</td><td><code>marketing</code></td></tr>
+            <tr><td>$3</td><td>pattern</td><td>Ignoriert (kommt aus FZF)</td><td><code>summarize</code></td></tr>
+            <tr><td>$4</td><td>limit</td><td>Max. Dateien</td><td><code>10</code></td></tr>
+            <tr><td>$5</td><td>include_claude</td><td>Conversations-Filter</td><td><code>0</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Vollstaendiger Code</h3>
+
+    <pre><code class="language-bash">_obs_f_run() {
+    local mode="$1" filter="$2" pattern="$3" limit="${4:-0}" include_claude="${5:-0}"
+
+    # --- Dateien sammeln ---
+    local files=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && files+=("$f")
+    done < <(_obs_f_collect "$mode" "$filter" "$limit" "$include_claude")
+
+    if [[ ${#files[@]} -eq 0 ]]; then
+        echo "Keine Dateien gefunden."
+        return 1
+    fi
+
+    echo "${#files[@]} Dateien gesammelt"
+
+    # --- Pattern waehlen via FZF ---
+    pattern=$(_obs_f_pick_fabric_pattern)
+    [[ $? -ne 0 || -z "$pattern" ]] && { echo "Abgebrochen."; return 0; }
+
+    echo "Fabric: ${pattern} (deutsch) ..."
+
+    # --- Alle Dateien durch Fabric schicken ---
+    local fabric_output
+    fabric_output=$({
+        echo "WICHTIG: Antworte komplett auf Deutsch."
+        echo ""
+        for f in "${files[@]}"; do
+            printf '\n\n--- %s ---\n\n' "$(basename "$f" .md)"
+            cat "$f" 2>/dev/null
+        done
+    } | "$_OBS_FABRIC_BIN" -p "$pattern")
+
+    # --- Output anzeigen ---
+    echo "$fabric_output"
+
+    # --- Claude Code Handoff anbieten ---
+    _obs_f_claude_handoff "$fabric_output" "$pattern" "${#files[@]}"
+}</code></pre>
+
+    <h3>Wie <code>while IFS= read -r</code> funktioniert</h3>
+
+    <pre><code class="language-bash"># _obs_f_collect gibt Dateipfade aus, eine pro Zeile:
+# /pfad/zur/datei1.md
+# /pfad/zur/datei2.md
+
+# < <(...) = Process Substitution: Ausgabe als "Datei" bereitstellen
+# IFS=     = Leerzeichen in Pfaden nicht als Trenner behandeln
+# read -r  = Backslashes nicht interpretieren
+# -n "$f"  = Leere Zeilen ueberspringen
+
+while IFS= read -r f; do
+    [[ -n "$f" ]] && files+=("$f")
+done < <(_obs_f_collect "$mode" "$filter" "$limit")</code></pre>
+
+    <h3>Wie der Fabric-Pipe funktioniert</h3>
+
+    <pre><code class="language-bash">fabric_output=$({
+    echo "WICHTIG: Antworte komplett auf Deutsch."    # Sprach-Instruktion
+    echo ""
+    for f in "${files[@]}"; do
+        printf '\n\n--- %s ---\n\n' "$(basename "$f" .md)"  # Datei-Trenner
+        cat "$f" 2>/dev/null                                  # Datei-Inhalt
+    done
+} | "$_OBS_FABRIC_BIN" -p "$pattern")
+#   ^ Alles in {} wird an Fabric gepipet
+#                        -p = welches Pattern</code></pre>
+
+    <p><strong>Ergebnis:</strong> Ein langer String mit dem Fabric-Output. Alle Dateien werden zusammengefuegt, die Deutsch-Instruktion vorangestellt, und das Ganze durch <code>fabric -p &lt;pattern&gt;</code> geschickt.</p>
+
+    <h3>Datenfluss durch die Fabric-Pipe</h3>
+
+    <div class="mermaid">
+flowchart LR
+    DE["Deutsch-Instruktion\nWICHTIG: Antworte\nauf Deutsch"] --> PIPE["Pipe"]
+    F1["Datei 1\n--- name1 ---\nInhalt"] --> PIPE
+    F2["Datei 2\n--- name2 ---\nInhalt"] --> PIPE
+    F3["Datei N\n--- nameN ---\nInhalt"] --> PIPE
+
+    PIPE --> FAB["fabric -p pattern\nz.B. extract_wisdom"]
+    FAB --> OUT["Fabric Output\nStrukturierte Analyse\nauf Deutsch"]
+    OUT --> TERM["Terminal-Ausgabe"]
+    OUT --> CTX["Kontext-Datei\nobs-f-context.md"]
+    CTX --> CC["Claude Code"]
+
+    style FAB fill:#9C27B0,stroke:#4A148C,color:#fff,stroke-width:3px
+    style CC fill:#2196F3,stroke:#0D47A1,color:#fff
+    </div>
+
+    <hr>
+
+    <h2 id="fn5-handoff">Funktion 5: <code>_obs_f_claude_handoff</code> &ndash; Claude Code Uebergabe</h2>
+
+    <p><strong>Was sie tut:</strong> Fragt "Weiter mit Claude Code? [j/N]". Bei ja: schreibt den Output in eine Datei und startet Claude Code.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>_obs_f_run()</code> und <code>_obs_f_single()</code></p>
+
+    <h3>Vollstaendiger Code</h3>
+
+    <pre><code class="language-bash">_obs_f_claude_handoff() {
+    local output="$1" pattern="$2" file_count="$3"
+
+    echo ""
+    printf "  -> Weiter mit Claude Code? [j/N] "
+    read -k1 answer       # Zsh: genau 1 Zeichen lesen (kein Enter noetig)
+    echo ""
+
+    [[ "$answer" != [jJyY] ]] && return 0   # Alles ausser j/J/y/Y = Nein
+
+    # Kontext-Datei schreiben
+    local ctx_file="$HOME/PAI/PAI_DIRECTORY/.state/obs-f-context.md"
+    mkdir -p "$(dirname "$ctx_file")"
+    cat > "$ctx_file" &lt;&lt;CTXEOF
+# Fabric-Analyse: $pattern
+**Dateien:** $file_count | **Zeitpunkt:** $(date '+%H:%M %d.%m.%Y')
+
+---
+
+$output
+CTXEOF
+
+    # Claude Code starten
+    echo "  Claude Code startet..."
+    claude "Lies die Datei $ctx_file - das ist eine Fabric-Analyse \
+($pattern) meines Obsidian Vaults. Hilf mir basierend auf dieser Analyse weiter."
+}</code></pre>
+
+    <p><strong>Warum Kontext-Datei statt Inline?</strong> Shell-Argumente haben eine Laengenbegrenzung (~262.144 Zeichen auf macOS). Ein Fabric-Output von 20 Dateien kann das ueberschreiten. Die Kontext-Datei hat keine Groessenbegrenzung, und Claude Code kann sie mit <code>Read</code> lesen.</p>
+
+    <h3>Claude Handoff Ablauf</h3>
+
+    <div class="mermaid">
+flowchart TD
+    Q["Weiter mit Claude Code?\nread -k1 answer"] --> D{"Antwort?"}
+    D -->|"j/J/y/Y"| WRITE["Kontext-Datei schreiben\nobs-f-context.md"]
+    D -->|"Alles andere"| STOP["return 0\nFertig"]
+
+    WRITE --> CONTENT["Heredoc mit\nPattern + Dateianzahl\n+ Zeitstempel\n+ Fabric Output"]
+    CONTENT --> START["claude Befehl\nmit Verweis auf\nKontext-Datei"]
+    START --> CC["Claude Code\nliest Datei\nund hilft weiter"]
+
+    style Q fill:#FF9800,stroke:#E65100,color:#fff
+    style CC fill:#2196F3,stroke:#0D47A1,color:#fff
+    </div>
+
+    <h3>Was <code>read -k1</code> macht</h3>
+
+    <pre><code class="language-bash">read -k1 answer
+# -k1 = Genau 1 Zeichen lesen, sofort (ohne Enter)
+# Nur in Zsh! In Bash waere es: read -n1 answer</code></pre>
+
+    <hr>
+
+    <h2 id="fn6-single">Funktion 6: <code>_obs_f_single</code> &ndash; Einzeldatei-Modus</h2>
+
+    <p><strong>Was sie tut:</strong> Laesst eine einzelne Datei waehlen, dann Pattern waehlen, dann Fabric laufen.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>obs-f()</code> bei <code>__SINGLE__</code>-Rezepten.</p>
+
+    <pre><code class="language-bash">_obs_f_single() {
+    local pattern="$1"
+    local file=$(_obs_f_pick_file)                # Datei per FZF waehlen
+    [[ -z "$file" ]] && return 0
+
+    pattern=$(_obs_f_pick_fabric_pattern)          # Pattern per FZF waehlen
+    [[ $? -ne 0 || -z "$pattern" ]] && return 0
+
+    # Datei durch Fabric schicken
+    local fabric_output
+    fabric_output=$({
+        echo "WICHTIG: Antworte komplett auf Deutsch."
+        echo ""
+        cat "$file"
+    } | "$_OBS_FABRIC_BIN" -p "$pattern")
+
+    echo "$fabric_output"
+
+    _obs_f_claude_handoff "$fabric_output" "$pattern" "1"
+}</code></pre>
+
+    <hr>
+
+    <h2 id="fn7-pick-file">Funktion 7: <code>_obs_f_pick_file</code> &ndash; Datei waehlen</h2>
+
+    <p><strong>Was sie tut:</strong> Zeigt die 100 neuesten Obsidian-Dateien in einem FZF-Menue.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>_obs_f_single()</code></p>
+
+    <pre><code class="language-bash">_obs_f_pick_file() {
+    local vault="$VAULT_AKADEMIE"
+
+    # 100 neueste Dateien via Obsidian CLI
+    local files_json=$(_obs_eval "$vault" "JSON.stringify(
+        app.vault.getFiles()
+            .filter(f => f.extension==='md'
+                && !f.path.includes('_Archive')
+                && !f.path.includes('_templates')
+                && !f.path.includes('.obsidian'))
+            .sort((a,b) => b.stat.mtime - a.stat.mtime)
+            .slice(0,100)
+            .map(f => f.path)
+    )")
+
+    # JSON-Array -> "pfad|ordner/name" Format fuer FZF
+    local file_lines=""
+    file_lines=$(echo "$files_json" | python3 -c "
+import json, sys, os
+vault = '$vault'
+for p in json.load(sys.stdin):
+    full = os.path.join(vault, p)
+    name = os.path.splitext(os.path.basename(p))[0]
+    folder = os.path.basename(os.path.dirname(p))
+    print(f'{full}|{folder}/{name}')
+")
+
+    # FZF: Nur Spalte 2 (ordner/name) anzeigen,
+    # aber Spalte 1 (vollstaendiger Pfad) zurueckgeben
+    echo "$file_lines" | fzf --height=30 --reverse --border \
+        --border-label=" Datei waehlen (100 neueste) " \
+        --prompt="datei > " \
+        --delimiter='|' \
+        --with-nth=2 | cut -d'|' -f1
+    #   ^ zeigt nur "ordner/name"   ^ gibt nur den Pfad zurueck
+}</code></pre>
+
+    <p><strong>Trick mit <code>--delimiter</code> und <code>--with-nth</code>:</strong> Die Daten haben das Format <code>pfad|anzeige</code>. FZF zeigt nur den Teil nach <code>|</code> (schoener Dateiname), gibt aber den Teil vor <code>|</code> zurueck (vollstaendiger Pfad).</p>
+
+    <hr>
+
+    <h2 id="fn8-pick-tag">Funktion 8: <code>_obs_f_pick_tag</code> &ndash; Tag/Ordner-Filter</h2>
+
+    <p><strong>Was sie tut:</strong> Zeigt Ordner-Schnellfilter und echte Obsidian-Tags in einem FZF-Menue.</p>
+
+    <p><strong>Aufgerufen durch:</strong> <code>obs-f()</code> bei <code>__TAG__</code>-Rezepten.</p>
+
+    <pre><code class="language-bash">_obs_f_pick_tag() {
+    local vault="$VAULT_AKADEMIE"
+    {
+        # Schnell-Filter (statisch)
+        echo "marketing"
+        echo "kurse"
+        echo "wissen"
+        echo "strategie"
+        echo "content"
+        echo "workflows"
+        echo "tools"
+        echo "daily"
+        echo "--------------"
+
+        # Echte Tags via Obsidian CLI (Top 30, nach Haeufigkeit sortiert)
+        local tags_json=$(_obs_eval "$vault" "JSON.stringify(
+            Object.entries(app.metadataCache.getTags())
+                .sort((a,b) => b[1] - a[1])
+                .slice(0,30)
+                .map(e => e[0].replace('#',''))
+        )")
+
+        if [[ -n "$tags_json" ]]; then
+            echo "$tags_json" | python3 -c \
+                "import json,sys;[print(t) for t in json.load(sys.stdin)]"
+        fi
+    } | fzf --height=25 --reverse --border \
+        --border-label=" Tag/Ordner Filter " \
+        --prompt="filter > "
+}</code></pre>
+
+    <p><strong>Datenfluss:</strong> Statische Ordner + dynamische Tags &rarr; FZF &rarr; Gewaehlter Filter-String.</p>
+
+    <hr>
+
+    <h2 id="eigene-patterns">Eigene Patterns hinzufuegen</h2>
+
+    <h3>Ins kuratierte Menue</h3>
+
+    <p>Fuege eine Zeile ins <code>CURATED</code>-Array von <code>_obs_f_pick_fabric_pattern</code> ein:</p>
+
+    <pre><code class="language-bash">"-- MEINE KATEGORIE ----------|"
+"mein_custom_pattern         | Meine eigene Analyse"</code></pre>
+
+    <p><strong>Wichtig:</strong> Die Spaces vor <code>|</code> muessen so lang sein, dass die Spalten sauber ausgerichtet sind (29 Zeichen bis <code>|</code>).</p>
+
+    <h3>Ein neues Fabric Pattern erstellen</h3>
+
+    <pre><code class="language-bash"># Ordner anlegen
+mkdir -p ~/.config/fabric/patterns/mein_custom_pattern
+
+# system.md schreiben
+cat > ~/.config/fabric/patterns/mein_custom_pattern/system.md &lt;&lt;'EOF'
+# IDENTITY and PURPOSE
+
+Du bist ein Experte fuer [dein Thema].
+
+# STEPS
+
+1. Lies den gesamten Inhalt
+2. Identifiziere die 5 wichtigsten Punkte
+3. ...
+
+# OUTPUT FORMAT
+
+- Ausgabe als Markdown
+- Deutsche Ueberschriften
+- Maximal 500 Woerter
+EOF</code></pre>
+
+    <p>Das Pattern erscheint sofort bei ALLE_PATTERNS. Fuer das kuratierte Menue musst du es ins <code>CURATED</code>-Array eintragen.</p>
+
+    <hr>
+
+    <h2 id="globale-variablen">Globale Variablen</h2>
+
+    <p>Diese Variablen muessen gesetzt sein, bevor obs-f funktioniert:</p>
+
+    <pre><code class="language-bash"># Vault-Pfad
+VAULT_AKADEMIE="$HOME/obsidian/Claude/Akademie"
+
+# Fabric Binary (brew-Version, nicht Anaconda)
+_OBS_FABRIC_BIN="/opt/homebrew/bin/fabric-ai"
+
+# Fabric Patterns Verzeichnis
+_OBS_FABRIC_PATTERNS="$HOME/.config/fabric/patterns"
+
+# Claude-Conversations-Schalter (Session-persistent)
+_OBS_F_CLAUDE=0</code></pre>
+
+    <hr>
+
+    <h2 id="minimal-setup">Minimal-Setup zum Nachbauen</h2>
+
+    <p>Wenn du das System von Null aufbauen willst, brauchst du nur diese 3 Dinge:</p>
+
+    <h3>1. Datei anlegen</h3>
+
+    <pre><code class="language-bash"># Datei erstellen
+touch ~/.zsh/functions/obs-f.zsh</code></pre>
+
+    <h3>2. Minimaler Code</h3>
+
+    <p>Kopiere diese 3 Funktionen in die Datei:</p>
+
+    <ul>
+        <li><code>_obs_f_pick_fabric_pattern</code> (Pattern-Menue)</li>
+        <li><code>_obs_f_claude_handoff</code> (Claude Uebergabe)</li>
+        <li>Eine vereinfachte <code>obs-f</code> Hauptfunktion:</li>
+    </ul>
+
+    <pre><code class="language-bash">obs-f() {
+    local vault="$HOME/obsidian/MeinVault"
+
+    # Alle heutigen Dateien sammeln
+    local files=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && files+=("$f")
+    done < <(find "$vault" -name "*.md" -mtime -1 -type f 2>/dev/null)
+
+    echo "${#files[@]} Dateien gefunden"
+    [[ ${#files[@]} -eq 0 ]] && return 1
+
+    # Pattern waehlen
+    local pattern=$(_obs_f_pick_fabric_pattern)
+    [[ -z "$pattern" ]] && return 0
+
+    # Durch Fabric schicken
+    local output
+    output=$({
+        echo "WICHTIG: Antworte auf Deutsch."
+        for f in "${files[@]}"; do
+            printf '\n--- %s ---\n' "$(basename "$f" .md)"
+            cat "$f"
+        done
+    } | fabric -p "$pattern")
+
+    echo "$output"
+    _obs_f_claude_handoff "$output" "$pattern" "${#files[@]}"
+}</code></pre>
+
+    <h3>3. Laden</h3>
+
+    <pre><code class="language-bash"># In .zshrc eintragen
+echo 'source ~/.zsh/functions/obs-f.zsh' >> ~/.zshrc
+
+# Neu laden
+source ~/.zshrc
+
+# Testen
+obs-f</code></pre>
+
+    <hr>
+
+    <h2 id="datei-uebersicht">Datei-Uebersicht</h2>
+
+    <table>
+        <thead><tr><th>Datei</th><th>Zweck</th></tr></thead>
+        <tbody>
+            <tr><td><code>~/.zsh/functions/obsidian-vaults.zsh</code></td><td>Alle 8 Funktionen (Quelldatei)</td></tr>
+            <tr><td><code>~/.config/fabric/patterns/*/system.md</code></td><td>239 Fabric Pattern-Definitionen</td></tr>
+            <tr><td><code>~/.state/obs-f-context.md</code></td><td>Temporaere Kontext-Datei fuer Claude Code</td></tr>
+            <tr><td><code>~/.zshrc</code></td><td>Hier wird die Funktionsdatei geladen (<code>source ...</code>)</td></tr>
+        </tbody>
+    </table>
+
+    <!-- === CONTENT END === -->
+
+    <div class="article-footer">
+        <p>Quelldatei: <code>obsidian-vaults.zsh</code> v5.8.0 | Stand: 18.02.2026</p>
+        <p style="margin-top: 0.5rem;">&copy; 2026 <a href="https://ai-pa.de">AI Performance Academy</a> &middot; Holger Gelhausen</p>
+    </div>
+
+</div>
+
+<!-- Prism.js -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
+<!-- Mermaid.js -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#238636',
+            primaryTextColor: '#e6edf3',
+            primaryBorderColor: '#30363d',
+            lineColor: '#484f58',
+            secondaryColor: '#161b22',
+            tertiaryColor: '#0d1117',
+            fontFamily: 'Inter, -apple-system, sans-serif',
+            fontSize: '14px'
+        },
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis'
+        },
+        mindmap: {
+            useMaxWidth: true
+        }
+    });
+</script>
+
+</body>
+</html>

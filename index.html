@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!-- Version: 1.1.0 -->
+<!-- Changelog:
+  v1.1.0 (18.02.2026) - Talk-Card fuer sema-claude Fabric Pipeline hinzugefuegt
+  v1.0.0 (18.02.2026) - Initial: Landing Page mit Talk-Uebersicht
+-->
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Performance Academy - Vortraege &amp; Anleitungen</title>
+
+    <!-- OG Tags -->
+    <meta property="og:title" content="AI Performance Academy - Vortraege &amp; Anleitungen">
+    <meta property="og:description" content="Technische Anleitungen und Vortragsmaterialien der AI Performance Academy">
+    <meta property="og:image" content="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://holgergelhausen.github.io/vortraege/">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+        }
+
+        header img {
+            width: 180px;
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1rem;
+            color: #8b949e;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .talks {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .talk-card {
+            display: block;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+
+        .talk-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(88, 166, 255, 0.1);
+        }
+
+        .talk-date {
+            font-size: 0.8rem;
+            color: #8b949e;
+            font-weight: 500;
+        }
+
+        .talk-card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0.4rem 0;
+        }
+
+        .talk-card p {
+            font-size: 0.9rem;
+            color: #8b949e;
+            margin-bottom: 0.8rem;
+        }
+
+        .talk-tags {
+            display: inline-flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .talk-tags span {
+            font-size: 0.75rem;
+            color: #58a6ff;
+            background: rgba(88, 166, 255, 0.1);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid #21262d;
+            color: #484f58;
+            font-size: 0.8rem;
+        }
+
+        footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            header img {
+                width: 140px;
+            }
+
+            .talk-card {
+                padding: 1.2rem;
+            }
+
+            .talk-card h2 {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png" alt="AI Performance Academy Logo">
+            <h1>Vortraege &amp; Anleitungen</h1>
+            <p>Technische Anleitungen und Vortragsmaterialien der AI Performance Academy</p>
+        </header>
+
+        <div class="talks">
+            <a href="sema-claude-fabric-pipeline/" class="talk-card">
+                <span class="talk-date">18.02.2026</span>
+                <h2>sema-claude v2.0 &mdash; Semantic Search + Fabric AI Pipeline</h2>
+                <p>Semantische Suche mit sema, 28 Fabric Patterns, fzf-Men&uuml;s, Claude Code Handoff. Shell-Grundlagen f&uuml;r Anf&auml;nger erkl&auml;rt.</p>
+                <div class="talk-tags">
+                    <span>sema</span>
+                    <span>Fabric AI</span>
+                    <span>FZF</span>
+                    <span>Claude Code</span>
+                    <span>Zsh</span>
+                </div>
+            </a>
+
+            <a href="obs-f-fabric-pattern-auswahl/" class="talk-card">
+                <span class="talk-date">18.02.2026</span>
+                <h2>obs-f &mdash; Obsidian Vault Analyse mit Fabric</h2>
+                <p>8 Shell-Funktionen, 28 Fabric Patterns, FZF-Menues, Claude Code Handoff. Komplette technische Anleitung zum Nachbauen.</p>
+                <div class="talk-tags">
+                    <span>Shell</span>
+                    <span>Obsidian</span>
+                    <span>Fabric</span>
+                    <span>FZF</span>
+                    <span>Claude Code</span>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 <a href="https://ai-pa.de">AI Performance Academy</a> &middot; Holger Gelhausen</p>
+        </footer>
+    </div>
+</body>
+</html>

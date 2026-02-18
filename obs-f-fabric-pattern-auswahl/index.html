@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<!-- Version: 2.3.0 -->
+<!-- Version: 3.0.0 -->
 <!-- Changelog:
-  v2.3.0 (18.02.2026) - Logo oben rechts, 3x groesser (384px)
-  v2.2.0 (18.02.2026) - "Alle Vortraege" Link entfernt, Logo verlinkt auf ai-pa.de
-  v2.1.0 (18.02.2026) - Logo 4x vergroessert (32px -> 128px)
+  v3.0.0 (18.02.2026) - Logo oben rechts absolut, HD-Logo, Schrift deutlich groesser
   v2.0.0 (18.02.2026) - Redesign: AIPA Branding, Hero/Abstract, Montserrat, Light Theme
   v1.0.0 (18.02.2026) - Initial: obs-f Guide als HTML mit Mermaid + Prism.js
 -->
@@ -16,7 +14,7 @@
     <!-- OG Tags -->
     <meta property="og:title" content="obs-f - Obsidian Vault Analyse mit Fabric Pattern-Auswahl">
     <meta property="og:description" content="8 Shell-Funktionen, 28 Fabric Patterns, FZF-Menues, Claude Code Handoff. Komplette technische Anleitung zum Nachbauen.">
-    <meta property="og:image" content="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png">
+    <meta property="og:image" content="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo.png">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://holgergelhausen.github.io/vortraege/obs-f-fabric-pattern-auswahl/">
     <meta name="twitter:card" content="summary_large_image">
@@ -57,43 +55,20 @@
             font-weight: 500;
             background: var(--aipa-hellgrau);
             color: var(--aipa-dunkelgrau);
-            line-height: 1.7;
-            font-size: 16px;
+            line-height: 1.8;
+            font-size: 19px;
         }
 
-        /* --- Sticky Nav --- */
-        .page-header {
-            background: var(--aipa-weiss);
-            border-bottom: 1px solid var(--aipa-sekundaer-hell);
-            padding: 0.8rem 1.5rem;
-            position: sticky;
-            top: 0;
+        /* --- Logo oben rechts --- */
+        .logo-corner {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
             z-index: 100;
         }
 
-        .page-header-inner {
-            max-width: 960px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        .page-header a {
-            color: var(--aipa-sekundaer);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .page-header a:hover {
-            color: var(--aipa-rot);
-        }
-
-        .page-header img {
-            height: 384px;
+        .logo-corner img {
+            height: 120px;
             width: auto;
         }
 
@@ -103,7 +78,7 @@
             padding: 4rem 1.5rem 3rem;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .hero::after {
@@ -122,7 +97,7 @@
         }
 
         .hero h1 {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
             font-weight: 700;
             color: var(--aipa-schwarz);
             line-height: 1.15;
@@ -134,11 +109,11 @@
         }
 
         .hero-subtitle {
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             color: var(--aipa-sekundaer);
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto 2rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         /* KPI Boxes */
@@ -236,14 +211,14 @@
             content: counter(toc) ".";
             color: var(--aipa-sekundaer);
             margin-right: 0.4rem;
-            font-size: 0.85rem;
+            font-size: 1rem;
             font-weight: 600;
         }
 
         .toc a {
             color: var(--aipa-dunkelgrau);
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 1rem;
             font-weight: 500;
             transition: color 0.2s;
         }
@@ -262,7 +237,7 @@
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: var(--aipa-schwarz);
             margin-top: 0;
@@ -272,7 +247,7 @@
         }
 
         h3 {
-            font-size: 1.15rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--aipa-schwarz);
             margin-top: 1.8rem;
@@ -280,7 +255,7 @@
         }
 
         h4 {
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--aipa-dunkelgrau);
             margin-top: 1.3rem;
@@ -346,7 +321,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 1.2rem;
-            font-size: 0.88rem;
+            font-size: 1rem;
         }
 
         th {
@@ -356,7 +331,7 @@
             border: 1px solid var(--aipa-sekundaer-hell);
             color: var(--aipa-schwarz);
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         td {
@@ -496,13 +471,11 @@
 </head>
 <body>
 
-<!-- Sticky Header -->
-<div class="page-header">
-    <div class="page-header-inner">
-        <a href="https://ai-pa.de">
-            <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png" alt="AI Performance Academy">
-        </a>
-    </div>
+<!-- Logo oben rechts -->
+<div class="logo-corner">
+    <a href="https://ai-pa.de">
+        <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo.png" alt="AI Performance Academy">
+    </a>
 </div>
 
 <!-- Hero / Abstract Section -->

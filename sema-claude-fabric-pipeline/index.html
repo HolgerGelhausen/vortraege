@@ -1,0 +1,2441 @@
+<!DOCTYPE html>
+<!-- Version: 3.0.0 -->
+<!-- Changelog:
+  v3.0.0 (18.02.2026) - Logo oben rechts absolut (120px), Navigation entfernt, "Alle Vortraege" entfernt
+  v2.0.0 (18.02.2026) - Kompletter Redesign: AIPA Brand Design System, Montserrat, Light Theme, alle Sektionen vollstaendig
+  v1.0.0 (18.02.2026) - Initial: Komplette technische Anleitung sema-claude v2.0 Pipeline
+-->
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sema-claude v2.0 &mdash; Semantic Search + Fabric AI Pipeline</title>
+
+    <!-- OG Tags -->
+    <meta property="og:title" content="sema-claude v2.0 &mdash; Semantic Search + Fabric AI Pipeline">
+    <meta property="og:description" content="Semantische Suche mit sema, 28 Fabric Patterns, fzf-Menues, Claude Code Handoff. Shell-Grundlagen fuer Anfaenger.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://holgergelhausen.github.io/vortraege/sema-claude-fabric-pipeline/">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Google Fonts: Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet">
+
+    <style>
+        /* ── CSS Custom Properties: AIPA Brand ── */
+        :root {
+            --aipa-schwarz: #000000;
+            --aipa-weiss: #FFFFFF;
+            --aipa-dunkelgrau: #1F1F1F;
+            --aipa-hellgrau: #F7F8FA;
+            --aipa-rot: #FF1A1A;
+            --aipa-hover-rot: #E01515;
+            --aipa-sekundaer: #767D8C;
+            --aipa-sekundaer-hell: #D9DDE3;
+            --aipa-blau-neutral: #34435C;
+            --aipa-chart-blau-1: #2B6CB0;
+            --aipa-chart-blau-2: #4A90E2;
+        }
+
+        /* ── Reset ── */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 24px;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--aipa-weiss);
+            color: var(--aipa-dunkelgrau);
+            min-height: 100vh;
+            line-height: 1.8;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        /* ── Logo oben rechts (absolut) ── */
+        .logo-corner {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .logo-corner img {
+            height: 120px;
+            width: auto;
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            margin-top: 0;
+            background: linear-gradient(180deg, var(--aipa-weiss) 0%, var(--aipa-hellgrau) 100%);
+            padding: 4rem 1.5rem 3rem;
+            text-align: center;
+            border-bottom: 1px solid var(--aipa-sekundaer-hell);
+            position: relative;
+        }
+
+        .hero-inner {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--aipa-schwarz);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span.version {
+            color: var(--aipa-rot);
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--aipa-sekundaer);
+            font-weight: 500;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.6;
+        }
+
+        .hero .date {
+            font-size: 0.9rem;
+            color: var(--aipa-sekundaer);
+            font-weight: 500;
+        }
+
+        /* ── Page Layout: Sidebar + Content ── */
+        .page-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            gap: 3rem;
+        }
+
+        /* ── Table of Contents (Sidebar) ── */
+        .toc {
+            width: 260px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 24px;
+            align-self: flex-start;
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+        }
+
+        .toc h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--aipa-sekundaer);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--aipa-rot);
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 0.25rem;
+        }
+
+        .toc a {
+            display: block;
+            padding: 0.3rem 0.5rem;
+            color: var(--aipa-blau-neutral);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+
+        .toc a:hover {
+            color: var(--aipa-rot);
+            background: var(--aipa-hellgrau);
+        }
+
+        .toc a.active {
+            color: var(--aipa-rot);
+            background: var(--aipa-hellgrau);
+            font-weight: 600;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            max-width: 860px;
+        }
+
+        /* ── Section Headings ── */
+        .main-content h2 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--aipa-schwarz);
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--aipa-rot);
+        }
+
+        .main-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .main-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--aipa-dunkelgrau);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .main-content h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--aipa-dunkelgrau);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ── Paragraphs ── */
+        .main-content p {
+            margin-bottom: 1rem;
+            color: var(--aipa-dunkelgrau);
+        }
+
+        /* ── Links ── */
+        .main-content a {
+            color: var(--aipa-rot);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .main-content a:hover {
+            color: var(--aipa-hover-rot);
+            text-decoration: underline;
+        }
+
+        /* ── Code Blocks ── */
+        .main-content pre[class*="language-"] {
+            background: var(--aipa-hellgrau) !important;
+            color: var(--aipa-dunkelgrau) !important;
+            border-left: 4px solid var(--aipa-rot);
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin: 1rem 0 1.5rem;
+            overflow-x: auto;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .main-content pre[class*="language-"] code {
+            background: none !important;
+            color: var(--aipa-dunkelgrau) !important;
+            font-size: 0.88rem;
+        }
+
+        /* Override Prism for light mode */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a737d !important; }
+        .token.punctuation { color: #24292e !important; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol { color: #005cc5 !important; }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin { color: #032f62 !important; }
+        .token.operator, .token.entity, .token.url { color: #d73a49 !important; }
+        .token.atrule, .token.attr-value, .token.keyword { color: #d73a49 !important; }
+        .token.function, .token.class-name { color: #6f42c1 !important; }
+        .token.variable { color: #e36209 !important; }
+
+        /* Inline code */
+        .main-content code:not([class*="language-"]) {
+            background: var(--aipa-hellgrau);
+            color: var(--aipa-blau-neutral);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* ── Pipeline Flow (special styled block) ── */
+        .pipeline-flow {
+            background: var(--aipa-hellgrau);
+            border-left: 4px solid var(--aipa-rot);
+            padding: 1.25rem 1.5rem;
+            border-radius: 6px;
+            margin: 1rem 0 1.5rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--aipa-dunkelgrau);
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
+
+        /* ── Tables ── */
+        .main-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .main-content table th {
+            background: var(--aipa-blau-neutral);
+            color: var(--aipa-weiss);
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .main-content table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--aipa-sekundaer-hell);
+            color: var(--aipa-dunkelgrau);
+        }
+
+        .main-content table tr:nth-child(even) td {
+            background: var(--aipa-hellgrau);
+        }
+
+        .main-content table tr:hover td {
+            background: #eef0f4;
+        }
+
+        /* ── Info/Tip Boxes ── */
+        .info-box {
+            background: #f0f3f8;
+            border-left: 4px solid var(--aipa-blau-neutral);
+            padding: 1rem 1.25rem;
+            border-radius: 0 6px 6px 0;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.92rem;
+        }
+
+        .info-box strong {
+            color: var(--aipa-blau-neutral);
+        }
+
+        .warn-box {
+            background: #fff8f0;
+            border-left: 4px solid #e67e22;
+            padding: 1rem 1.25rem;
+            border-radius: 0 6px 6px 0;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.92rem;
+        }
+
+        .tip-box {
+            background: #f0faf0;
+            border-left: 4px solid #27ae60;
+            padding: 1rem 1.25rem;
+            border-radius: 0 6px 6px 0;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.92rem;
+        }
+
+        /* ── Lists ── */
+        .main-content ul, .main-content ol {
+            margin: 0.5rem 0 1.25rem 1.5rem;
+        }
+
+        .main-content li {
+            margin-bottom: 0.4rem;
+            color: var(--aipa-dunkelgrau);
+        }
+
+        .main-content li strong {
+            color: var(--aipa-schwarz);
+        }
+
+        /* ── Mermaid Diagrams ── */
+        .mermaid-wrapper {
+            background: var(--aipa-hellgrau);
+            border: 1px solid var(--aipa-sekundaer-hell);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .mermaid-wrapper .mermaid {
+            text-align: center;
+        }
+
+        .mermaid-caption {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--aipa-sekundaer);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* ── Block Explanation Sections ── */
+        .block-section {
+            background: var(--aipa-weiss);
+            border: 1px solid var(--aipa-sekundaer-hell);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .block-section h4 {
+            margin-top: 0;
+            color: var(--aipa-rot);
+            font-size: 1.05rem;
+        }
+
+        .block-section p {
+            font-size: 0.92rem;
+        }
+
+        /* ── Details/Summary (Collapsible) ── */
+        details {
+            background: var(--aipa-hellgrau);
+            border: 1px solid var(--aipa-sekundaer-hell);
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        details summary {
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            color: var(--aipa-dunkelgrau);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        details summary:hover {
+            color: var(--aipa-rot);
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--aipa-sekundaer-hell);
+        }
+
+        details > pre {
+            margin: 0 !important;
+            border-left: none !important;
+            border-radius: 0 0 8px 8px !important;
+        }
+
+        /* ── Horizontal Rule ── */
+        .main-content hr {
+            border: none;
+            border-top: 1px solid var(--aipa-sekundaer-hell);
+            margin: 2.5rem 0;
+        }
+
+        /* ── Strong ── */
+        .main-content strong {
+            font-weight: 700;
+            color: var(--aipa-schwarz);
+        }
+
+        /* ── Category Header in Pattern Table ── */
+        .cat-header td {
+            background: var(--aipa-blau-neutral) !important;
+            color: var(--aipa-weiss) !important;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            background: var(--aipa-blau-neutral);
+            color: var(--aipa-weiss);
+            padding: 2.5rem 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .footer-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-inner a {
+            color: var(--aipa-weiss);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .footer-inner a:hover {
+            opacity: 1;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .footer-brand img {
+            height: 28px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        .footer-brand span {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .footer-meta {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* ── Mobile TOC Toggle ── */
+        .toc-mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 999;
+            background: var(--aipa-rot);
+            color: var(--aipa-weiss);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255,26,26,0.3);
+            transition: background 0.2s;
+        }
+
+        .toc-mobile-toggle:hover {
+            background: var(--aipa-hover-rot);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .page-layout {
+                flex-direction: column;
+                padding: 1.5rem 1rem;
+            }
+
+            .toc {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                max-height: none;
+                background: var(--aipa-weiss);
+                z-index: 998;
+                padding: 1.5rem;
+                overflow-y: auto;
+                border-bottom: 1px solid var(--aipa-sekundaer-hell);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+
+            .toc.mobile-open {
+                display: block;
+            }
+
+            .toc-mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .hero .subtitle {
+                font-size: 0.95rem;
+            }
+
+            .main-content h2 {
+                font-size: 1.3rem;
+            }
+
+            .main-content table {
+                font-size: 0.8rem;
+            }
+
+            .main-content table th, .main-content table td {
+                padding: 0.5rem 0.6rem;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- LOGO OBEN RECHTS                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<a href="https://ai-pa.de" class="logo-corner">
+    <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png" alt="AI Performance Academy">
+</a>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HERO SECTION                                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="hero">
+    <div class="hero-inner">
+        <h1>sema-claude <span class="version">v2.0</span> &mdash; Semantic Search + Fabric AI Pipeline</h1>
+        <p class="subtitle">Semantische Suche mit sema, 28 Fabric Patterns, fzf-Men&uuml;s, Claude Code Handoff. Shell-Grundlagen f&uuml;r Anf&auml;nger erkl&auml;rt.</p>
+        <p class="date">18.02.2026</p>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE LAYOUT: TOC Sidebar + Content                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page-layout">
+
+    <!-- ── Table of Contents (Sidebar) ── -->
+    <aside class="toc" id="toc">
+        <h3>Inhalt</h3>
+        <ul>
+            <li><a href="#was-macht-dieses-tool">Was macht dieses Tool?</a></li>
+            <li><a href="#voraussetzungen">Voraussetzungen</a></li>
+            <li><a href="#was-ist-fzf">Was ist fzf?</a></li>
+            <li><a href="#shell-grundlagen">Shell-Grundlagen</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#code-block-fuer-block">Code Block f&uuml;r Block</a></li>
+            <li><a href="#alle-28-patterns">Alle 28 kuratierten Patterns</a></li>
+            <li><a href="#fehlerbehebung">Fehlerbehebung</a></li>
+            <li><a href="#skill-obsidian-vault-query">Claude Code Skill</a></li>
+            <li><a href="#anhang-quellcode">Anhang: Quellcode</a></li>
+        </ul>
+    </aside>
+
+    <!-- ── Mobile TOC Toggle Button ── -->
+    <button class="toc-mobile-toggle" id="tocToggle" aria-label="Inhaltsverzeichnis anzeigen">&#9776;</button>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT                                           -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <main class="main-content">
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 2: Was macht dieses Tool?               -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="was-macht-dieses-tool">Was macht dieses Tool?</h2>
+
+        <p><code>sema-claude</code> ist eine Zsh-Shell-Funktion, die drei Werkzeuge zu einer interaktiven Pipeline verbindet:</p>
+
+        <div class="pipeline-flow">
+            Suchbegriff eingeben &rarr; sema durchsucht semantisch &rarr; fzf Dateiauswahl &rarr; Fabric Pattern w&auml;hlen &rarr; Claude Code ausf&uuml;hren
+        </div>
+
+        <p><strong>Beispiel:</strong> Du tippst <code>sema-claude "Wardley Maps"</code>. sema findet 20 Dateien. Du w&auml;hlst 3 davon aus. Dann w&auml;hlst du <code>extract_wisdom</code>. Claude Code liest alle 3 Dateien und extrahiert Ideen, Zitate, Erkenntnisse &mdash; alles auf Deutsch.</p>
+
+        <h3>Pipeline-&Uuml;bersicht</h3>
+
+        <div class="mermaid-wrapper">
+            <pre class="mermaid">
+flowchart TD
+    A["Suchbegriff eingeben&lt;br/&gt;&lt;i&gt;z.B. 'Wardley Maps'&lt;/i&gt;"] --> B["sema CLI&lt;br/&gt;Semantische Suche"]
+    B --> C["fzf Dateiauswahl&lt;br/&gt;Tab = markieren, Enter = fertig"]
+    C --> D{"Welcher Modus?"}
+    D -->|"Kuratiertes Pattern"| E["Fabric Pattern waehlen&lt;br/&gt;&lt;i&gt;28 Patterns in 7 Kategorien&lt;/i&gt;"]
+    D -->|"Freie Frage"| F["Eigene Frage eingeben"]
+    D -->|"Alle durchsuchen"| G["Alle 239 Patterns&lt;br/&gt;mit fzf durchsuchen"]
+    E --> H["system.md laden&lt;br/&gt;&lt;i&gt;~/.config/fabric/patterns/&lt;/i&gt;"]
+    G --> H
+    F --> I["Prompt zusammenbauen"]
+    H --> I
+    I --> J["Claude Code&lt;br/&gt;Dateien lesen + Framework abarbeiten"]
+    J --> K["Ausgabe auf Deutsch"]
+            </pre>
+            <p class="mermaid-caption">Abb. 1: Pipeline-&Uuml;bersicht &mdash; Vom Suchbegriff zum Ergebnis</p>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 3: Voraussetzungen                      -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="voraussetzungen">Voraussetzungen</h2>
+
+        <h3>Komponentenarchitektur</h3>
+
+        <div class="mermaid-wrapper">
+            <pre class="mermaid">
+graph TB
+    subgraph Terminal["Terminal (Zsh)"]
+        SC["sema-claude()&lt;br/&gt;&lt;i&gt;Shell-Funktion&lt;/i&gt;"]
+    end
+    subgraph SemaSystem["sema System"]
+        CLI["sema CLI&lt;br/&gt;bun cli.ts"]
+        DB["sema.db&lt;br/&gt;&lt;i&gt;sqlite-vec&lt;/i&gt;&lt;br/&gt;38.425 Chunks"]
+        EMB["HuggingFace&lt;br/&gt;Embeddings"]
+        CLI --> DB
+        DB --> EMB
+    end
+    subgraph FabricSystem["Fabric AI"]
+        PDIR["~/.config/fabric/patterns/"]
+        P1["extract_wisdom/&lt;br/&gt;system.md"]
+        P2["summarize/&lt;br/&gt;system.md"]
+        P3["... 237 weitere ..."]
+        PDIR --> P1
+        PDIR --> P2
+        PDIR --> P3
+    end
+    subgraph Tools["Interaktive Tools"]
+        FZF["fzf&lt;br/&gt;&lt;i&gt;Fuzzy Finder&lt;/i&gt;"]
+    end
+    subgraph Claude["Claude Code"]
+        CC["claude CLI&lt;br/&gt;&lt;i&gt;Anthropic API&lt;/i&gt;"]
+    end
+    SC --> CLI
+    SC --> FZF
+    SC --> PDIR
+    SC --> CC
+            </pre>
+            <p class="mermaid-caption">Abb. 2: Komponentenarchitektur &mdash; Alle beteiligten Systeme</p>
+        </div>
+
+        <h3>5 Komponenten werden ben&ouml;tigt</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Komponente</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>sema</strong> (Semantische Suche)</td>
+                    <td>Lokale semantische Suche mit Vektoren. Indexiert dein Obsidian-Vault oder beliebige Markdown-Dateien und findet inhaltlich &auml;hnliche Dokumente &mdash; nicht nur nach Stichwort, sondern nach <em>Bedeutung</em>.</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Fabric AI</strong> (Pattern-Bibliothek)</td>
+                    <td>239 vorgefertigte &bdquo;Patterns&ldquo; von Daniel Miessler. Jedes Pattern ist ein <code>system.md</code>-File mit einem pr&auml;zisen Analyse-Framework, z.B. &bdquo;extrahiere Weisheit&ldquo; oder &bdquo;finde Logikfehler&ldquo;.</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>fzf</strong> (Fuzzy Finder)</td>
+                    <td>Interaktiver Filter f&uuml;rs Terminal. Erm&ouml;glicht dir, aus langen Listen schnell etwas auszuw&auml;hlen &mdash; mit Vorschau, Mehrfachauswahl und Fuzzy-Suche.</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Claude Code</strong> (CLI)</td>
+                    <td>Anthropics CLI-Tool. Nimmt einen Prompt entgegen, liest die angegebenen Dateien und liefert eine KI-Analyse.</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Zsh + Bun</strong></td>
+                    <td>Zsh als Shell (macOS-Standard), Bun als JavaScript-Runtime f&uuml;r sema CLI.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Datenfluss</h3>
+
+        <div class="mermaid-wrapper">
+            <pre class="mermaid">
+flowchart LR
+    subgraph Stufe1["Stufe 1: Semantische Suche"]
+        Q["query&lt;br/&gt;'Wardley Maps'"] --> SEMA["sema CLI"]
+        SEMA --> RAW["raw_output&lt;br/&gt;1. [0.712] /pfad/datei.md&lt;br/&gt;2. [0.823] /pfad/andere.md"]
+        RAW --> SED["sed Parser"]
+        SED --> LINES["file_lines&lt;br/&gt;[0.712] /pfad/datei.md&lt;br/&gt;[0.823] /pfad/andere.md"]
+    end
+    subgraph Stufe1b["Stufe 1b: Dateiauswahl"]
+        LINES --> FZF1["fzf --multi"]
+        FZF1 --> SELECTED["selected&lt;br/&gt;[0.712] /pfad/datei.md"]
+        SELECTED --> SED2["sed Score entfernen"]
+        SED2 --> PATHS["paths&lt;br/&gt;/pfad/datei.md"]
+    end
+    subgraph Stufe2["Stufe 2: Pattern + Prompt"]
+        PATHS --> LIST["file_list&lt;br/&gt;- /pfad/datei.md"]
+        PATTERN["system.md&lt;br/&gt;&lt;i&gt;Fabric Pattern&lt;/i&gt;"] --> PROMPT["prompt"]
+        LIST --> PROMPT
+    end
+    PROMPT --> CLAUDE["claude '$prompt'"]
+            </pre>
+            <p class="mermaid-caption">Abb. 3: Datenfluss &mdash; Vom Suchbegriff &uuml;ber sed-Parsing zum fertigen Prompt</p>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 4: Was ist fzf?                         -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="was-ist-fzf">Was ist fzf?</h2>
+
+        <p><strong>fzf</strong> (fuzzy finder) ist ein interaktiver Kommandozeilen-Filter. Stell dir vor, du hast eine lange Liste &mdash; z.B. 20 Suchergebnisse &mdash; und willst schnell die richtigen ausw&auml;hlen. fzf zeigt dir die Liste im Terminal, du tippst ein paar Buchstaben und die Liste filtert sich in Echtzeit.</p>
+
+        <div class="info-box">
+            <strong>Grundprinzip:</strong> Irgendein Befehl gibt viele Zeilen aus &rarr; <code>| fzf</code> &rarr; du w&auml;hlst interaktiv aus &rarr; fzf gibt die Auswahl zur&uuml;ck.
+        </div>
+
+        <h3>Wichtige fzf-Parameter</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Bedeutung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>--multi</code></td>
+                    <td>Mehrere Eintr&auml;ge ausw&auml;hlen erlauben (mit Tab)</td>
+                </tr>
+                <tr>
+                    <td><code>--no-multi</code></td>
+                    <td>Nur einen Eintrag ausw&auml;hlen</td>
+                </tr>
+                <tr>
+                    <td><code>--prompt="Text &gt; "</code></td>
+                    <td>Text links neben dem Cursor</td>
+                </tr>
+                <tr>
+                    <td><code>--header="Text"</code></td>
+                    <td>&Uuml;berschrift &uuml;ber der Liste</td>
+                </tr>
+                <tr>
+                    <td><code>--preview='befehl'</code></td>
+                    <td>Vorschau rechts, <code>{}</code> = aktueller Eintrag</td>
+                </tr>
+                <tr>
+                    <td><code>--preview-window=right:50%:wrap</code></td>
+                    <td>Position, Breite, Zeilenumbruch der Vorschau</td>
+                </tr>
+                <tr>
+                    <td><code>--height=80%</code></td>
+                    <td>80% der Terminal-H&ouml;he nutzen</td>
+                </tr>
+                <tr>
+                    <td><code>--border=rounded</code></td>
+                    <td>Runder Rahmen um die Auswahl</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 5: Shell-Grundlagen                     -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="shell-grundlagen">Shell-Grundlagen (f&uuml;r Anf&auml;nger)</h2>
+
+        <p>Wenn du noch nie ein Shell-Script geschrieben hast, erkl&auml;rt dieser Abschnitt alle Konzepte, die im <code>sema-claude</code>-Code vorkommen. Jedes Konzept wird mit einem eigenen Beispiel gezeigt.</p>
+
+        <!-- ── Variablen ── -->
+        <h3>Variablen</h3>
+
+        <p>Eine Variable speichert einen Wert. In Zsh schreibst du den Namen ohne Leerzeichen um das <code>=</code>:</p>
+
+<pre class="language-bash"><code># Einfache Variable
+name="Holger"
+echo "$name"     # Gibt: Holger
+
+# Lokale Variable (nur in der Funktion sichtbar)
+local query="Wardley Maps"
+
+# Lokales Array
+local -a SEMA_CLI=(bun /pfad/cli.ts)</code></pre>
+
+        <div class="info-box">
+            <strong><code>local</code></strong> bedeutet: Diese Variable existiert nur innerhalb der Funktion. Ohne <code>local</code> w&auml;re sie global und k&ouml;nnte andere Funktionen st&ouml;ren.<br>
+            <strong><code>local -a</code></strong> erstellt ein lokales <em>Array</em> (eine Liste von Werten).
+        </div>
+
+        <!-- ── Funktions-Definition ── -->
+        <h3>Funktions-Definition</h3>
+
+        <p>Eine Funktion ist ein wiederverwendbarer Codeblock mit einem Namen:</p>
+
+<pre class="language-bash"><code># Funktion definieren
+sema-claude() {
+    echo "Hallo von sema-claude"
+    # ... hier kommt der Code
+}
+
+# Funktion aufrufen
+sema-claude</code></pre>
+
+        <p>Der Code zwischen <code>{</code> und <code>}</code> wird erst ausgef&uuml;hrt, wenn du den Funktionsnamen tippst. Die Klammern <code>()</code> nach dem Namen sind Pflicht &mdash; sie sagen der Shell: &bdquo;Das ist eine Funktion.&ldquo;</p>
+
+        <!-- ── Parameter und Argumente ── -->
+        <h3>Parameter und Argumente</h3>
+
+        <p>Wenn du einer Funktion Werte mitgibst, landen sie in <code>$1</code>, <code>$2</code>, etc.:</p>
+
+<pre class="language-bash"><code>greet() {
+    echo "Hallo, $1!"     # $1 = erstes Argument
+}
+
+greet "Welt"               # Gibt: Hallo, Welt!
+greet "Claude"             # Gibt: Hallo, Claude!</code></pre>
+
+        <p><code>${1:-}</code> ist ein sicherer Zugriff: Wenn <code>$1</code> leer ist, wird ein leerer String zur&uuml;ckgegeben statt eines Fehlers. Variante mit Default-Wert:</p>
+
+<pre class="language-bash"><code>local query="${1:-}"           # Leer, wenn nichts uebergeben
+local top="${2:-20}"           # Default: 20, wenn $2 fehlt</code></pre>
+
+        <!-- ── Bedingte Ausfuehrung ── -->
+        <h3>Bedingte Ausf&uuml;hrung</h3>
+
+        <p>Die doppelten eckigen Klammern <code>[[ ]]</code> pr&uuml;fen Bedingungen:</p>
+
+<pre class="language-bash"><code># -z = "ist leer?" (zero length)
+[[ -z "$query" ]]      # wahr, wenn $query leer ist
+
+# -n = "ist NICHT leer?" (non-zero)
+[[ -n "$query" ]]      # wahr, wenn $query einen Wert hat
+
+# -f = "existiert die Datei?"
+[[ -f "$pattern_file" ]]  # wahr, wenn Datei existiert
+
+# Vergleiche
+[[ "$name" == "Holger" ]]  # String-Vergleich
+[[ "$count" -gt 10 ]]     # Zahl groesser als 10</code></pre>
+
+        <!-- ── if/then/fi ── -->
+        <h3>if / then / fi</h3>
+
+        <p>Die klassische Verzweigung:</p>
+
+<pre class="language-bash"><code>if [[ -z "$query" ]]; then
+    echo "Kein Suchbegriff!"
+    return 1
+fi
+
+# Mit else:
+if [[ -f "$file" ]]; then
+    echo "Datei gefunden"
+else
+    echo "Datei nicht vorhanden"
+fi</code></pre>
+
+        <div class="info-box">
+            <strong><code>return 1</code></strong> beendet die Funktion mit einem Fehlercode. <code>return 0</code> = Erfolg, alles andere = Fehler.
+        </div>
+
+        <!-- ── Kurzform mit && ── -->
+        <h3>Kurzform mit &amp;&amp;</h3>
+
+        <p><code>&amp;&amp;</code> bedeutet &bdquo;UND &mdash; f&uuml;hre den rechten Befehl nur aus, wenn der linke erfolgreich war&ldquo;:</p>
+
+<pre class="language-bash"><code># Kurzform statt if/then/fi:
+[[ -z "$selected" ]] && { echo "Abgebrochen."; return 1; }
+
+# Das ist identisch mit:
+if [[ -z "$selected" ]]; then
+    echo "Abgebrochen."
+    return 1
+fi</code></pre>
+
+        <p>Die geschweiften Klammern <code>{ }</code> gruppieren mehrere Befehle. Wichtig: Das Semikolon vor <code>}</code> ist Pflicht!</p>
+
+        <!-- ── Kurzform mit $DEBUG ── -->
+        <h3>Kurzform mit $DEBUG</h3>
+
+<pre class="language-bash"><code>local DEBUG=false
+
+# $DEBUG wird "ausgefuehrt" - false ist ein gueltiger Befehl (gibt immer Fehler)
+# && fuehrt printf nur aus, wenn $DEBUG=true
+$DEBUG && printf "[DEBUG] Wert: %s\n" "$var"
+
+# Aequivalent zu:
+if $DEBUG; then
+    printf "[DEBUG] Wert: %s\n" "$var"
+fi</code></pre>
+
+        <div class="info-box">
+            <strong>Trick:</strong> <code>true</code> und <code>false</code> sind echte Programme in Unix. <code>true</code> gibt Exit-Code 0 (Erfolg), <code>false</code> gibt Exit-Code 1 (Fehler). Deshalb funktioniert <code>$DEBUG &amp;&amp; ...</code> als bedingter Befehl.
+        </div>
+
+        <!-- ── Command Substitution ── -->
+        <h3>Command Substitution <code>$( )</code></h3>
+
+        <p>F&auml;ngt die Ausgabe eines Befehls in einer Variable auf:</p>
+
+<pre class="language-bash"><code># Die Ausgabe von sema CLI wird in raw_output gespeichert
+local raw_output
+raw_output=$("${SEMA_CLI[@]}" search "$query" --top "$TOP" 2>&1)
+
+# Einfacheres Beispiel:
+local today=$(date +%Y-%m-%d)   # z.B. "2026-02-18"
+local files=$(ls *.md)          # Alle .md-Dateien</code></pre>
+
+        <p>Alles zwischen <code>$(</code> und <code>)</code> wird ausgef&uuml;hrt und das Ergebnis ersetzt den gesamten Ausdruck.</p>
+
+        <!-- ── Arrays ── -->
+        <h3>Arrays mit [@]</h3>
+
+<pre class="language-bash"><code># Array definieren
+local -a SEMA_CLI=(bun /pfad/cli.ts)
+
+# Alle Elemente des Arrays einsetzen
+"${SEMA_CLI[@]}"
+# wird zu: bun /pfad/cli.ts
+
+# Warum Array statt String?
+local SEMA_CLI_STRING="bun /pfad/cli.ts"
+$SEMA_CLI_STRING     # PROBLEM: Zsh zerlegt am Leerzeichen falsch
+
+# Mit Array:
+"${SEMA_CLI[@]}"     # KORREKT: Jedes Element wird einzeln uebergeben</code></pre>
+
+        <div class="warn-box">
+            <strong>Wichtig:</strong> In Zsh (anders als Bash) kann Word-Splitting bei Strings zu schwer findenbaren Fehlern f&uuml;hren. Arrays sind sicherer, weil jedes Element exakt als ein Argument &uuml;bergeben wird.
+        </div>
+
+        <!-- ── Pipe ── -->
+        <h3>Pipe <code>|</code></h3>
+
+        <p>Die Pipe leitet die Ausgabe eines Befehls als Eingabe an den n&auml;chsten:</p>
+
+<pre class="language-bash"><code># Ausgabe von echo geht an sed:
+echo "Hallo Welt" | sed 's/Welt/Claude/'
+# Ergebnis: Hallo Claude
+
+# Mehrere Pipes hintereinander:
+echo "$raw_output" | sed -n 's/^pattern/\1/p' | wc -l | tr -d ' '
+#    Ausgabe      → parsen         → Zeilen zaehlen → Leerzeichen weg</code></pre>
+
+        <p>Jeder <code>|</code> nimmt die Standardausgabe (stdout) des linken Befehls und f&uuml;ttert sie als Standardeingabe (stdin) in den rechten.</p>
+
+        <!-- ── sed ── -->
+        <h3>sed (Stream Editor)</h3>
+
+        <p><code>sed</code> verarbeitet Text zeilenweise mit Regul&auml;ren Ausdr&uuml;cken. Zentral f&uuml;r <code>sema-claude</code>, weil wir damit die sema-Ausgabe parsen:</p>
+
+<pre class="language-bash"><code># Der wichtigste sed-Befehl im Script:
+sed -n 's/^[[:space:]]*[0-9]*\.[[:space:]]*\(\[.*\]\)/\1/p'</code></pre>
+
+        <p>Das sieht auf den ersten Blick verwirrend aus. Zerlegen wir es:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Teil</th>
+                    <th>Bedeutung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sed -n</code></td>
+                    <td>Unterdr&uuml;ckt Standard-Ausgabe. Nur Zeilen mit <code>/p</code> werden gedruckt.</td>
+                </tr>
+                <tr>
+                    <td><code>'s/MUSTER/ERSETZUNG/p'</code></td>
+                    <td>Suchen und Ersetzen. <code>/p</code> = Ergebnis ausgeben.</td>
+                </tr>
+                <tr>
+                    <td><code>^</code></td>
+                    <td>Zeilenanfang</td>
+                </tr>
+                <tr>
+                    <td><code>[[:space:]]*</code></td>
+                    <td>Beliebig viele Leerzeichen/Tabs</td>
+                </tr>
+                <tr>
+                    <td><code>[0-9]*</code></td>
+                    <td>Beliebig viele Ziffern (die Nummerierung: 1, 2, 3...)</td>
+                </tr>
+                <tr>
+                    <td><code>\.</code></td>
+                    <td>Wortwörtlicher Punkt (nach der Nummer)</td>
+                </tr>
+                <tr>
+                    <td><code>\(\[.*\]\)</code></td>
+                    <td>Capture Group: F&auml;ngt alles ab <code>[Score] /pfad</code></td>
+                </tr>
+                <tr>
+                    <td><code>\1</code></td>
+                    <td>Gibt die Capture Group aus (den eingefangenen Teil)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Vorher &rarr; Nachher:</strong></p>
+
+<pre class="language-bash"><code># Eingabe (sema-Ausgabe):
+"  1.  [0.712] /pfad/wardley-maps.md"
+"  2.  [0.823] /pfad/strategie-als-hypothese.md"
+
+# Nach sed:
+"[0.712] /pfad/wardley-maps.md"
+"[0.823] /pfad/strategie-als-hypothese.md"</code></pre>
+
+        <p>Ein zweiter, einfacherer sed-Befehl entfernt sp&auml;ter den Score:</p>
+
+<pre class="language-bash"><code>sed 's/^\[.*\] //'
+# Vorher: [0.712] /pfad/wardley-maps.md
+# Nachher: /pfad/wardley-maps.md</code></pre>
+
+        <!-- ── awk ── -->
+        <h3>awk</h3>
+
+        <p><code>awk</code> ist ein Textverarbeitungs-Tool, das Zeilen in Spalten zerlegt:</p>
+
+<pre class="language-bash"><code># Erste Spalte extrahieren (Trennzeichen: Leerzeichen)
+echo "extract_wisdom  │ Weisheit extrahieren" | awk '{print $1}'
+# Ergebnis: extract_wisdom
+
+# Im Script: Pattern-Name aus der fzf-Auswahl extrahieren
+local pattern
+pattern=$(echo "$choice" | awk '{print $1}')</code></pre>
+
+        <p><code>$1</code> bei awk bedeutet &bdquo;erste Spalte&ldquo;, <code>$2</code> die zweite, etc. Standardm&auml;&szlig;ig trennt awk an Leerzeichen.</p>
+
+        <!-- ── printf ── -->
+        <h3>printf</h3>
+
+        <p><code>printf</code> gibt formatierten Text aus &mdash; zuverl&auml;ssiger als <code>echo</code>:</p>
+
+<pre class="language-bash"><code># Formatierter Text mit Platzhaltern
+printf "Suche nach \"%s\" ...\n" "$query"
+# Gibt: Suche nach "Wardley Maps" ...
+
+# Farbige Ausgabe mit ANSI-Codes
+printf "\033[1;36m🔍 Semantic Search\033[0m\n"
+printf "\033[0;33m⏳ Suche ...\033[0m\n"
+printf "\033[0;32m✅ %s Treffer\033[0m\n" "$count"</code></pre>
+
+        <h4>ANSI-Farbcodes</h4>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Farbe</th>
+                    <th>Verwendung im Script</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>\033[0m</code></td>
+                    <td>Reset (Normal)</td>
+                    <td>Farbe zur&uuml;cksetzen</td>
+                </tr>
+                <tr>
+                    <td><code>\033[1;36m</code></td>
+                    <td>Fett + Cyan</td>
+                    <td>&Uuml;berschriften, wichtige Info</td>
+                </tr>
+                <tr>
+                    <td><code>\033[0;33m</code></td>
+                    <td>Gelb</td>
+                    <td>Warnungen, Status-Infos</td>
+                </tr>
+                <tr>
+                    <td><code>\033[0;32m</code></td>
+                    <td>Gr&uuml;n</td>
+                    <td>Erfolg, Best&auml;tigungen</td>
+                </tr>
+                <tr>
+                    <td><code>\033[1;32m</code></td>
+                    <td>Fett + Gr&uuml;n</td>
+                    <td>&bdquo;Enter = Starten&ldquo;</td>
+                </tr>
+                <tr>
+                    <td><code>\033[1;31m</code></td>
+                    <td>Fett + Rot</td>
+                    <td>&bdquo;Ctrl+C = Abbrechen&ldquo;</td>
+                </tr>
+                <tr>
+                    <td><code>\033[0;90m</code></td>
+                    <td>Grau</td>
+                    <td>Nebens&auml;chliche Infos</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Das Format: <code>\033[</code> startet eine Escape-Sequenz, die Zahl bestimmt die Farbe, <code>m</code> beendet sie.</p>
+
+        <!-- ── read ── -->
+        <h3>read (Benutzereingabe)</h3>
+
+<pre class="language-bash"><code># Eingabe vom Benutzer lesen
+printf "Suchbegriff: "
+read -r query
+
+# -r = "raw mode" - verhindert, dass Backslash als Escape interpretiert wird
+# $query enthaelt jetzt die Eingabe</code></pre>
+
+        <p>Im Script wird <code>read -r</code> an drei Stellen verwendet:</p>
+        <ol>
+            <li>Suchbegriff abfragen (wenn keiner als Argument &uuml;bergeben)</li>
+            <li>Freie Frage eingeben (bei FREIE_FRAGE Pattern)</li>
+            <li>Best&auml;tigung vor dem Start (Enter dr&uuml;cken)</li>
+        </ol>
+
+        <!-- ── Here-String ── -->
+        <h3>Here-String <code>&lt;&lt;&lt;</code></h3>
+
+<pre class="language-bash"><code># Here-String: Text als stdin uebergeben
+while IFS= read -r p; do
+    file_list+="- $p"$'\n'
+done <<< "$paths"
+
+# <<< "$paths" fuettert den Inhalt von $paths Zeile fuer Zeile
+# in die while-Schleife</code></pre>
+
+        <div class="info-box">
+            <strong><code>&lt;&lt;&lt;</code></strong> (Here-String) &uuml;bergibt eine Variable als Eingabe, als w&auml;re es eine Datei. Alternative w&auml;re <code>echo "$paths" | while ...</code>, aber Here-Strings sind in Zsh effizienter.
+        </div>
+
+        <!-- ── stderr redirect ── -->
+        <h3><code>2&gt;&amp;1</code> (stderr umleiten)</h3>
+
+<pre class="language-bash"><code># Normalerweise gibt es zwei Ausgabe-Kanaele:
+# 1 = stdout (normale Ausgabe)
+# 2 = stderr (Fehlermeldungen)
+
+# 2>&1 bedeutet: stderr (2) nach stdout (1) umleiten
+raw_output=$("${SEMA_CLI[@]}" search "$query" --top "$TOP" 2>&1)
+
+# Ohne 2>&1: Fehlermeldungen erscheinen im Terminal statt in der Variable
+# Mit 2>&1:  ALLES landet in $raw_output</code></pre>
+
+        <p>Wichtig f&uuml;r sema-claude, weil manche CLI-Tools Warnungen auf stderr schreiben, die sonst verloren gehen.</p>
+
+        <!-- ── Exit-Code ── -->
+        <h3><code>$?</code> (Exit-Code)</h3>
+
+<pre class="language-bash"><code># Jeder Befehl gibt einen Exit-Code zurueck:
+# 0 = Erfolg
+# 1-255 = Fehler
+
+ls /existiert/nicht
+echo $?    # Gibt: 1 (Fehler)
+
+ls /tmp
+echo $?    # Gibt: 0 (Erfolg)
+
+# Im Script:
+local exit_code=$?
+# Speichert den Exit-Code des vorherigen Befehls</code></pre>
+
+        <!-- ── String-Laenge ── -->
+        <h3>String-L&auml;nge und Substring</h3>
+
+<pre class="language-bash"><code># Laenge eines Strings:
+echo ${#prompt}          # z.B. 2847 (Zeichen)
+
+# Substring (erste 300 Zeichen):
+echo "${prompt:0:300}"   # Ab Position 0, 300 Zeichen
+
+# Letzte 150 Zeichen:
+echo "${prompt: -150}"   # Leerzeichen vor dem Minus ist Pflicht!
+
+# Im Script: Langen Prompt abkuerzen
+if [[ ${#prompt} -gt 500 ]]; then
+    echo "${prompt:0:300}"
+    printf "\n... (%s Zeichen) ...\n" "${#prompt}"
+    echo "${prompt: -150}"
+fi</code></pre>
+
+        <!-- ── wc und tr ── -->
+        <h3><code>wc -l | tr -d ' '</code></h3>
+
+<pre class="language-bash"><code># wc -l = Zeilen zaehlen (word count, lines)
+echo "$file_lines" | wc -l
+# Gibt z.B.: "      20" (mit fuehrenden Leerzeichen!)
+
+# tr -d ' ' = Leerzeichen loeschen (translate, delete)
+echo "$file_lines" | wc -l | tr -d ' '
+# Gibt: "20" (sauber)
+
+# Im Script:
+local count=$(echo "$file_lines" | wc -l | tr -d ' ')</code></pre>
+
+        <!-- ── cat ── -->
+        <h3>cat (Datei lesen)</h3>
+
+<pre class="language-bash"><code># cat gibt den Inhalt einer Datei aus:
+cat system.md
+
+# Im Script: Pattern-Datei einlesen
+local system_prompt
+system_prompt=$(cat "$pattern_file")
+# $system_prompt enthaelt jetzt den gesamten Dateiinhalt</code></pre>
+
+        <p><code>cat</code> steht f&uuml;r &bdquo;concatenate&ldquo; (verkn&uuml;pfen) und kann auch mehrere Dateien zusammenf&uuml;gen: <code>cat file1.txt file2.txt</code>.</p>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 6: Installation                         -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="installation">Installation</h2>
+
+        <h3>Schritt 1: Datei anlegen</h3>
+
+<pre class="language-bash"><code>mkdir -p ~/.zsh/functions
+# Kopiere den Code (siehe Anhang) in diese Datei:
+# ~/.zsh/functions/sema-claude.zsh</code></pre>
+
+        <h3>Schritt 2: In .zshrc laden</h3>
+
+        <p>F&uuml;ge diese Zeile am Ende deiner <code>~/.zshrc</code> hinzu:</p>
+
+<pre class="language-bash"><code>source ~/.zsh/functions/sema-claude.zsh</code></pre>
+
+        <h3>Schritt 3: Pfade anpassen</h3>
+
+        <p>In der Datei <code>sema-claude.zsh</code>, passe diese zwei Variablen an:</p>
+
+<pre class="language-bash"><code># Pfad zu deiner sema CLI (Zeile 11):
+local -a SEMA_CLI=(bun /dein/pfad/zu/sema/cli.ts)
+
+# Pfad zu deinen Fabric Patterns (Zeile 14):
+local PATTERNS_DIR="$HOME/.config/fabric/patterns"</code></pre>
+
+        <h3>Schritt 4: Shell neu laden und testen</h3>
+
+<pre class="language-bash"><code>source ~/.zshrc
+
+# Test:
+sema-claude "suchbegriff"
+
+# Mit Debug-Ausgabe:
+sema-claude --debug "suchbegriff"</code></pre>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 7: Code Block fuer Block                -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="code-block-fuer-block">Der Code Block f&uuml;r Block erkl&auml;rt</h2>
+
+        <p>Die Funktion besteht aus 13 logischen Bl&ouml;cken. Jeder Block wird hier einzeln erkl&auml;rt.</p>
+
+        <!-- Block 1 -->
+        <div class="block-section">
+            <h4>Block 1: Konfiguration (Zeile 10&ndash;15)</h4>
+
+<pre class="language-bash"><code>sema-claude() {
+  local -a SEMA_CLI=(bun /Users/holgergelhausen/PAI/PAI_DIRECTORY/tools/sema/cli.ts)
+  local TOP=20
+  local DEBUG=false
+  local PATTERNS_DIR="$HOME/.config/fabric/patterns"
+  [[ "$1" == "--debug" ]] && { DEBUG=true; shift; }</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>SEMA_CLI</code> &mdash; Array mit dem sema-Aufruf. Array statt String, damit Zsh die Argumente korrekt trennt.</li>
+                <li><code>TOP=20</code> &mdash; Maximale Anzahl Suchergebnisse von sema.</li>
+                <li><code>DEBUG=false</code> &mdash; Debug-Modus standardm&auml;&szlig;ig aus.</li>
+                <li><code>PATTERNS_DIR</code> &mdash; Wo Fabric seine <code>system.md</code>-Dateien speichert.</li>
+                <li><code>[[ "$1" == "--debug" ]]</code> &mdash; Pr&uuml;ft, ob <code>--debug</code> als erstes Argument &uuml;bergeben wurde. <code>shift</code> entfernt es, damit <code>$1</code> danach der Suchbegriff ist.</li>
+            </ul>
+        </div>
+
+        <!-- Block 2 -->
+        <div class="block-section">
+            <h4>Block 2: Suchbegriff abfragen (Zeile 17&ndash;24)</h4>
+
+<pre class="language-bash"><code>  local query="${1:-}"
+  if [[ -z "$query" ]]; then
+    printf "\033[1;36m🔍 Semantic Search → Claude Code (Fabric AI)\033[0m\n"
+    printf "Suchbegriff: "
+    read -r query
+    [[ -z "$query" ]] && { echo "Abgebrochen."; return 1; }
+  fi</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>${1:-}</code> &mdash; Nimmt den ersten Parameter oder leeren String.</li>
+                <li>Wenn kein Suchbegriff &uuml;bergeben: Interaktive Eingabe mit <code>read</code>.</li>
+                <li>Wenn auch dann nichts eingegeben wird: Abbruch mit <code>return 1</code>.</li>
+            </ul>
+        </div>
+
+        <!-- Block 3 -->
+        <div class="block-section">
+            <h4>Block 3: sema-Suche ausf&uuml;hren (Zeile 26&ndash;40)</h4>
+
+<pre class="language-bash"><code>  printf "\033[0;33m⏳ Suche nach \"%s\" ...\033[0m\n" "$query"
+  local raw_output
+  raw_output=$("${SEMA_CLI[@]}" search "$query" --top "$TOP" 2>&1)
+  local exit_code=$?
+
+  $DEBUG && printf "[DEBUG] exit_code=%s, output_length=%s\n" "$exit_code" "${#raw_output}"
+  $DEBUG && echo "[DEBUG] First 3 lines:" && echo "$raw_output" | head -3
+
+  if [[ -z "$raw_output" ]] || [[ ${#raw_output} -lt 10 ]]; then
+    echo "❌ Keine Ausgabe von sema CLI (exit: $exit_code)"
+    return 1
+  fi</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>"${SEMA_CLI[@]}"</code> &mdash; F&uuml;hrt <code>bun /pfad/cli.ts search "query" --top 20</code> aus.</li>
+                <li><code>2&gt;&amp;1</code> &mdash; Fehlermeldungen ebenfalls auffangen.</li>
+                <li><code>$?</code> &mdash; Exit-Code speichern f&uuml;r Debug-Ausgabe.</li>
+                <li>Pr&uuml;fung: Wenn die Ausgabe leer oder k&uuml;rzer als 10 Zeichen ist, bricht die Funktion ab.</li>
+            </ul>
+        </div>
+
+        <!-- Block 4 -->
+        <div class="block-section">
+            <h4>Block 4: Ergebnisse parsen mit sed (Zeile 42&ndash;57)</h4>
+
+<pre class="language-bash"><code>  local file_lines
+  file_lines=$(echo "$raw_output" | sed -n 's/^[[:space:]]*[0-9]*\.[[:space:]]*\(\[.*\]\)/\1/p')
+
+  if [[ -z "$file_lines" ]]; then
+    echo "❌ Konnte Ergebnisse nicht parsen."
+    return 1
+  fi
+
+  local count=$(echo "$file_lines" | wc -l | tr -d ' ')
+  printf "\033[0;32m✅ %s Treffer\033[0m\n\n" "$count"</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li>Die sema-Ausgabe hat das Format <code>  1.  [0.712] /pfad/datei.md</code>.</li>
+                <li><code>sed</code> entfernt die Nummerierung und beh&auml;lt <code>[Score] Pfad</code>.</li>
+                <li><code>wc -l | tr -d ' '</code> z&auml;hlt die Treffer (sauber ohne Leerzeichen).</li>
+                <li>Wenn sed nichts findet (unerwartetes Format): Abbruch.</li>
+            </ul>
+        </div>
+
+        <!-- Block 5 -->
+        <div class="block-section">
+            <h4>Block 5: fzf Dateiauswahl (Zeile 62&ndash;71)</h4>
+
+<pre class="language-bash"><code>  local selected
+  selected=$(echo "$file_lines" | fzf \
+    --multi \
+    --prompt="Tab=markieren, Enter=fertig > " \
+    --header="🔍 \"$query\" — $count Treffer" \
+    --preview='f=$(echo {} | sed "s/^\[.*\] //"); head -40 "$f" 2>/dev/null || echo "Keine Preview"' \
+    --preview-window=right:50%:wrap \
+    --height=80% \
+    --border=rounded)</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>--multi</code> &mdash; Mehrere Dateien mit Tab markieren.</li>
+                <li><code>--preview</code> &mdash; Zeigt die ersten 40 Zeilen der aktuellen Datei rechts an. Der <code>sed</code> entfernt den Score aus dem Pfad.</li>
+                <li><code>2&gt;/dev/null</code> &mdash; Fehlermeldungen bei nicht lesbaren Dateien unterdr&uuml;cken.</li>
+                <li>Wenn der Benutzer Escape dr&uuml;ckt, ist <code>$selected</code> leer &rarr; Abbruch.</li>
+            </ul>
+        </div>
+
+        <!-- Block 6 -->
+        <div class="block-section">
+            <h4>Block 6: Score entfernen (Zeile 75&ndash;79)</h4>
+
+<pre class="language-bash"><code>  local paths
+  paths=$(echo "$selected" | sed 's/^\[.*\] //')
+  local selected_count=$(echo "$paths" | wc -l | tr -d ' ')
+  printf "\n\033[0;32m📄 %s Datei(en) gewählt\033[0m\n\n" "$selected_count"</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>sed 's/^\[.*\] //'</code> &mdash; Entfernt den Score <code>[0.712]</code> vom Anfang jeder Zeile.</li>
+                <li>&Uuml;brig bleiben nur die reinen Dateipfade.</li>
+                <li>Z&auml;hlt und zeigt an, wie viele Dateien gew&auml;hlt wurden.</li>
+            </ul>
+        </div>
+
+        <!-- Block 7 -->
+        <div class="block-section">
+            <h4>Block 7: Pattern-Liste definieren (Zeile 82&ndash;120)</h4>
+
+<pre class="language-bash"><code>  local -a CURATED=(
+    "── ANALYSIEREN & ERKLÄREN ───│"
+    "extract_wisdom               │ Weisheit, Ideen, Zitate, Gewohnheiten extrahieren"
+    "extract_insights             │ Die 10 überraschendsten Kernerkenntnisse"
+    ...
+    "── CUSTOM ──────────────────-│"
+    "FREIE_FRAGE                  │ Eigene Frage an Claude Code"
+    "ALLE_PATTERNS                │ Alle 239 Fabric Patterns durchsuchen"
+  )</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li>Ein Array <code>CURATED</code> enth&auml;lt die 28 handverlesenen Patterns plus Kategorie-Header.</li>
+                <li>Jeder Eintrag hat das Format: <code>pattern_name │ Beschreibung</code>.</li>
+                <li>Die Kategorie-Header beginnen mit <code>──</code> und dienen als visuelle Trenner in fzf.</li>
+                <li>Zwei Sondereintr&auml;ge: <code>FREIE_FRAGE</code> und <code>ALLE_PATTERNS</code>.</li>
+            </ul>
+        </div>
+
+        <!-- Block 8 -->
+        <div class="block-section">
+            <h4>Block 8: fzf Pattern-Auswahl mit Preview (Zeile 122&ndash;137)</h4>
+
+<pre class="language-bash"><code>  local choice
+  choice=$(printf '%s\n' "${CURATED[@]}" | fzf \
+    --prompt="Pattern wählen > " \
+    --header="🧠 Fabric AI Pattern für Claude Code" \
+    --preview='p=$(echo {} | awk "{print \$1}");
+              f="'"$PATTERNS_DIR"'/$p/system.md";
+              if [[ -f "$f" ]]; then
+                printf "\033[1;33m── %s ──\033[0m\n\n" "$p"
+                head -30 "$f"
+              else
+                echo "📂 Kategorie-Header"
+              fi' \
+    --preview-window=right:50%:wrap \
+    --height=80% \
+    --border=rounded \
+    --no-multi)</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>printf '%s\n' "${CURATED[@]}"</code> &mdash; Jedes Array-Element als eigene Zeile.</li>
+                <li><code>--preview</code> &mdash; Zeigt die <code>system.md</code> des gerade fokussierten Patterns rechts an.</li>
+                <li><code>awk '{print $1}'</code> &mdash; Extrahiert den Pattern-Namen (erste Spalte).</li>
+                <li><code>--no-multi</code> &mdash; Nur ein Pattern ausw&auml;hlen (keine Mehrfachauswahl).</li>
+            </ul>
+        </div>
+
+        <!-- Block 9 -->
+        <div class="block-section">
+            <h4>Block 9: Pattern-Name extrahieren (Zeile 141&ndash;151)</h4>
+
+<pre class="language-bash"><code>  local pattern
+  pattern=$(echo "$choice" | awk '{print $1}')
+
+  if [[ "$pattern" == "──" ]]; then
+    echo "⚠️ Kategorie-Header, kein Pattern."
+    return 1
+  fi</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><code>awk '{print $1}'</code> &mdash; Nimmt nur das erste Wort der Auswahl, z.B. <code>extract_wisdom</code>.</li>
+                <li>Sicherheitspr&uuml;fung: Wenn jemand einen Kategorie-Header ausw&auml;hlt (beginnt mit <code>──</code>), wird abgebrochen.</li>
+            </ul>
+        </div>
+
+        <!-- Block 10 -->
+        <div class="block-section">
+            <h4>Block 10: Sonderf&auml;lle (Zeile 153&ndash;178)</h4>
+
+<pre class="language-bash"><code>  local action=""
+  if [[ "$pattern" == "FREIE_FRAGE" ]]; then
+    printf "\033[1;36mDeine Frage:\033[0m "
+    read -r action
+    [[ -z "$action" ]] && { echo "Abgebrochen."; return 1; }
+  fi
+
+  if [[ "$pattern" == "ALLE_PATTERNS" ]]; then
+    pattern=$(ls "$PATTERNS_DIR" | fzf \
+      --prompt="Pattern suchen > " \
+      --header="🔍 Alle Fabric Patterns durchsuchen" \
+      --preview='f="'"$PATTERNS_DIR"'/{}/system.md";
+                if [[ -f "$f" ]]; then
+                  printf "\033[1;33m── {} ──\033[0m\n\n"
+                  head -30 "$f"
+                else
+                  echo "Keine system.md gefunden"
+                fi' \
+      --preview-window=right:50%:wrap \
+      --height=80% \
+      --border=rounded \
+      --no-multi)
+    [[ -z "$pattern" ]] && { echo "Abgebrochen."; return 1; }
+  fi</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li><strong>FREIE_FRAGE:</strong> Statt eines Fabric Patterns gibt der Benutzer eine eigene Frage ein. Diese wird sp&auml;ter direkt als Prompt verwendet.</li>
+                <li><strong>ALLE_PATTERNS:</strong> &Ouml;ffnet ein zweites fzf-Men&uuml;, das alle 239 Fabric-Verzeichnisse auflistet. So kann man auch Patterns au&szlig;erhalb der kuratierten 28 nutzen.</li>
+            </ul>
+        </div>
+
+        <!-- Block 11 -->
+        <div class="block-section">
+            <h4>Block 11: Datei-Liste aufbauen (Zeile 180&ndash;184)</h4>
+
+<pre class="language-bash"><code>  local file_list=""
+  while IFS= read -r p; do
+    file_list+="- $p"$'\n'
+  done <<< "$paths"</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li>Jeder Dateipfad wird mit einem <code>-</code> pr&auml;fixiert (Markdown-Listenformat).</li>
+                <li><code>IFS=</code> &mdash; Verhindert, dass f&uuml;hrende/nachfolgende Leerzeichen abgeschnitten werden.</li>
+                <li><code>&lt;&lt;&lt; "$paths"</code> &mdash; Here-String f&uuml;ttert die Pfade in die Schleife.</li>
+                <li><code>$'\n'</code> &mdash; Literal Newline (Zsh-Syntax).</li>
+                <li>Ergebnis z.B.: <code>- /pfad/wardley.md\n- /pfad/strategie.md\n</code></li>
+            </ul>
+        </div>
+
+        <!-- Block 12 -->
+        <div class="block-section">
+            <h4>Block 12: Prompt zusammenbauen (Zeile 186&ndash;221)</h4>
+
+<pre class="language-bash"><code>  local prompt=""
+
+  if [[ -n "$action" ]]; then
+    # Freie Frage: Einfacher Prompt
+    prompt="$action
+
+Basierend auf diesen Dateien (semantische Suche: \"$query\"):
+
+$file_list
+Lies bitte zuerst alle Dateien und arbeite dann die Aufgabe ab. Antworte auf Deutsch."
+  else
+    # Fabric Pattern: system.md laden
+    local pattern_file="$PATTERNS_DIR/$pattern/system.md"
+    if [[ ! -f "$pattern_file" ]]; then
+      echo "❌ Pattern-Datei nicht gefunden: $pattern_file"
+      return 1
+    fi
+
+    local system_prompt
+    system_prompt=$(cat "$pattern_file")
+
+    prompt="SPRACHE: Deine gesamte Ausgabe MUSS auf Deutsch sein. ...
+
+Du folgst diesem Analyse-Framework:
+
+---
+$system_prompt
+---
+
+Wende dieses Framework auf folgende Dateien an (semantische Suche: \"$query\"):
+
+$file_list
+Lies bitte zuerst alle Dateien vollstaendig und arbeite dann das Framework systematisch auf Deutsch ab."
+  fi</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li>Zwei Pfade: <strong>Freie Frage</strong> (einfacher Text-Prompt) vs. <strong>Fabric Pattern</strong> (system.md wird eingebettet).</li>
+                <li>Bei Fabric: Die gesamte <code>system.md</code> wird in den Prompt eingebaut, eingeklammert von <code>---</code>.</li>
+                <li>Die Sprach-Anweisung steht ganz oben &mdash; damit Claude auf Deutsch antwortet.</li>
+                <li>Die Dateiliste sagt Claude, welche Dateien gelesen werden sollen.</li>
+            </ul>
+        </div>
+
+        <!-- Block 13 -->
+        <div class="block-section">
+            <h4>Block 13: Best&auml;tigung und Start (Zeile 223&ndash;251)</h4>
+
+<pre class="language-bash"><code>  printf "\n\033[1;36m━━━ Claude Code Prompt ━━━\033[0m\n"
+  if [[ -n "$action" ]]; then
+    printf "\033[0;33mModus:\033[0m Freie Frage\n"
+    printf "\033[0;33mFrage:\033[0m %s\n" "$action"
+  else
+    printf "\033[0;33mPattern:\033[0m %s\n" "$pattern"
+    printf "\033[0;33mQuelle:\033[0m %s\n" "$PATTERNS_DIR/$pattern/system.md"
+  fi
+  printf "\033[0;33mDateien:\033[0m %s\n" "$selected_count"
+  printf "\033[0;33mSuche:\033[0m \"%s\"\n" "$query"
+  printf "\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\n"
+
+  if [[ ${#prompt} -gt 500 ]]; then
+    echo "${prompt:0:300}"
+    printf "\n\033[0;90m... (%s Zeichen, inkl. system.md) ...\033[0m\n\n" "${#prompt}"
+    echo "${prompt: -150}"
+  else
+    echo "$prompt"
+  fi
+
+  printf "\n\033[1;32mEnter\033[0m = Starten, \033[1;31mCtrl+C\033[0m = Abbrechen "
+  read -r
+
+  printf "\n\033[0;33m🚀 Starte Claude Code mit Fabric Pattern \"%s\"...\033[0m\n" "${pattern:-custom}"
+  claude "$prompt"
+}</code></pre>
+
+            <p><strong>Was passiert hier:</strong></p>
+            <ul>
+                <li>Eine &Uuml;bersicht wird angezeigt: Pattern-Name, Dateien, Suchbegriff.</li>
+                <li>Bei langen Prompts (&gt;500 Zeichen): Nur Anfang und Ende zeigen, Mitte abk&uuml;rzen.</li>
+                <li><code>read -r</code> &mdash; Wartet auf Enter. Ctrl+C bricht ab.</li>
+                <li><code>claude "$prompt"</code> &mdash; Der finale Aufruf! Claude Code erh&auml;lt den kompletten Prompt mit Framework + Dateiliste.</li>
+            </ul>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 8: Alle 28 kuratierten Patterns         -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="alle-28-patterns">Alle 28 kuratierten Patterns</h2>
+
+        <p>Die 28 handverlesenen Fabric Patterns sind in 7 Kategorien organisiert. Jedes Pattern hat eine <code>system.md</code>-Datei mit einem pr&auml;zisen Analyse-Framework.</p>
+
+        <!-- Analysieren & Erklaeren -->
+        <h3>Analysieren &amp; Erkl&auml;ren (11 Patterns)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>extract_wisdom</code></td>
+                    <td>Weisheit, Ideen, Zitate, Gewohnheiten extrahieren</td>
+                </tr>
+                <tr>
+                    <td><code>extract_insights</code></td>
+                    <td>Die 10 &uuml;berraschendsten Kernerkenntnisse</td>
+                </tr>
+                <tr>
+                    <td><code>analyze_prose</code></td>
+                    <td>Schreibqualit&auml;t bewerten + Verbesserungsvorschl&auml;ge</td>
+                </tr>
+                <tr>
+                    <td><code>analyze_claims</code></td>
+                    <td>Behauptungen auf Wahrheit pr&uuml;fen (A&ndash;F Rating)</td>
+                </tr>
+                <tr>
+                    <td><code>analyze_paper</code></td>
+                    <td>Wissenschaftliche Rigor-Analyse</td>
+                </tr>
+                <tr>
+                    <td><code>analyze_presentation</code></td>
+                    <td>Pr&auml;sentation reviewen und kritisch bewerten</td>
+                </tr>
+                <tr>
+                    <td><code>analyze_tech_impact</code></td>
+                    <td>Technologie-Impact auf Gesellschaft analysieren</td>
+                </tr>
+                <tr>
+                    <td><code>find_logical_fallacies</code></td>
+                    <td>Logikfehler und Fehlschl&uuml;sse finden</td>
+                </tr>
+                <tr>
+                    <td><code>explain_docs</code></td>
+                    <td>Dokumentation verst&auml;ndlich erkl&auml;ren</td>
+                </tr>
+                <tr>
+                    <td><code>explain_terms</code></td>
+                    <td>Glossar aller wichtigen Begriffe erstellen</td>
+                </tr>
+                <tr>
+                    <td><code>rate_content</code></td>
+                    <td>Inhalt bewerten + Qualit&auml;ts-Rating (1&ndash;10)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Zusammenfassen -->
+        <h3>Zusammenfassen (4 Patterns)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>summarize</code></td>
+                    <td>1-Satz-Summary + 10 Hauptpunkte + 5 Takeaways</td>
+                </tr>
+                <tr>
+                    <td><code>create_summary</code></td>
+                    <td>Strukturierte Markdown-Zusammenfassung</td>
+                </tr>
+                <tr>
+                    <td><code>create_5_sentence_summary</code></td>
+                    <td>5-Satz-Zusammenfassung</td>
+                </tr>
+                <tr>
+                    <td><code>extract_core_message</code></td>
+                    <td>Kernbotschaft auf den Punkt</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Vergleichen -->
+        <h3>Vergleichen (1 Pattern)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>compare_and_contrast</code></td>
+                    <td>Markdown-Tabelle: Gemeinsamkeiten &amp; Unterschiede</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Content Erstellen -->
+        <h3>Content Erstellen (6 Patterns)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>write_essay</code></td>
+                    <td>Essay im Paul-Graham-Stil</td>
+                </tr>
+                <tr>
+                    <td><code>create_keynote</code></td>
+                    <td>Keynote/Pr&auml;sentation erstellen</td>
+                </tr>
+                <tr>
+                    <td><code>write_micro_essay</code></td>
+                    <td>Micro-Essay (&lt; 300 W&ouml;rter)</td>
+                </tr>
+                <tr>
+                    <td><code>improve_writing</code></td>
+                    <td>Text &uuml;berarbeiten: Klarheit, Koh&auml;renz, Stil</td>
+                </tr>
+                <tr>
+                    <td><code>enrich_blog_post</code></td>
+                    <td>Blog-Post anreichern und verbessern</td>
+                </tr>
+                <tr>
+                    <td><code>create_newsletter_entry</code></td>
+                    <td>Newsletter-Abschnitt erstellen</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Extrahieren -->
+        <h3>Extrahieren (4 Patterns)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>extract_ideas</code></td>
+                    <td>20&ndash;50 &uuml;berraschende Ideen</td>
+                </tr>
+                <tr>
+                    <td><code>extract_recommendations</code></td>
+                    <td>Handlungsempfehlungen</td>
+                </tr>
+                <tr>
+                    <td><code>extract_questions</code></td>
+                    <td>Offene Fragen identifizieren</td>
+                </tr>
+                <tr>
+                    <td><code>create_tags</code></td>
+                    <td>Tags und Kategorien generieren</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Lernen -->
+        <h3>Lernen (2 Patterns)</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>create_flash_cards</code></td>
+                    <td>Lernkarten f&uuml;r Schl&uuml;sselkonzepte</td>
+                </tr>
+                <tr>
+                    <td><code>create_quiz</code></td>
+                    <td>Quiz-Fragen zum Inhalt generieren</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 9: Fehlerbehebung                       -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="fehlerbehebung">Fehlerbehebung</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Problem</th>
+                    <th>Ursache</th>
+                    <th>L&ouml;sung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sema-claude: command not found</code></td>
+                    <td><code>source</code> in <code>.zshrc</code> fehlt</td>
+                    <td><code>source ~/.zsh/functions/sema-claude.zsh</code> hinzuf&uuml;gen und Shell neu laden</td>
+                </tr>
+                <tr>
+                    <td>&bdquo;Keine Ausgabe von sema CLI&ldquo;</td>
+                    <td>sema nicht installiert oder falscher Pfad</td>
+                    <td><code>SEMA_CLI</code>-Pfad in der Funktion pr&uuml;fen. Mit <code>--debug</code> testen.</td>
+                </tr>
+                <tr>
+                    <td>&bdquo;Konnte Ergebnisse nicht parsen&ldquo;</td>
+                    <td>sema-Ausgabeformat hat sich ge&auml;ndert</td>
+                    <td>sema manuell aufrufen (<code>bun cli.ts search "test"</code>) und Format pr&uuml;fen</td>
+                </tr>
+                <tr>
+                    <td>fzf zeigt keine Preview</td>
+                    <td>Dateipfade stimmen nicht / Dateien nicht lesbar</td>
+                    <td>Pfade in der fzf-Ausgabe manuell pr&uuml;fen</td>
+                </tr>
+                <tr>
+                    <td>&bdquo;Pattern-Datei nicht gefunden&ldquo;</td>
+                    <td>Fabric nicht installiert oder <code>PATTERNS_DIR</code> falsch</td>
+                    <td><code>ls ~/.config/fabric/patterns/</code> pr&uuml;fen. <code>fabric --update</code> ausf&uuml;hren.</td>
+                </tr>
+                <tr>
+                    <td>Claude gibt englische Ausgabe</td>
+                    <td>Selten bei kurzen Texten</td>
+                    <td>Prompt beginnt mit <code>SPRACHE: Deine gesamte Ausgabe MUSS auf Deutsch sein.</code> &mdash; normalerweise reicht das.</td>
+                </tr>
+                <tr>
+                    <td><code>claude: command not found</code></td>
+                    <td>Claude Code CLI nicht installiert</td>
+                    <td><code>npm install -g @anthropic-ai/claude-code</code></td>
+                </tr>
+                <tr>
+                    <td>Word-Splitting-Fehler</td>
+                    <td><code>SEMA_CLI</code> als String statt Array</td>
+                    <td>Muss <code>local -a SEMA_CLI=(...)</code> sein (Array!)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>Tipp:</strong> Bei jedem Problem zuerst mit <code>sema-claude --debug "test"</code> starten. Die Debug-Ausgabe zeigt Exit-Code, Output-L&auml;nge und die ersten 3 Zeilen der sema-Antwort.
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 10: Claude Code Skill                   -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="skill-obsidian-vault-query">Claude Code Skill: obsidian-vault-query</h2>
+
+        <p>Neben der Shell-Funktion <code>sema-claude</code> gibt es einen zweiten Weg, sema zu nutzen: als <strong>Claude Code Skill</strong>. Dieser Skill wird <em>innerhalb</em> von Claude Code aktiviert, nicht im Terminal.</p>
+
+        <h3>Was ist ein Claude Code Skill?</h3>
+
+        <p>Ein Skill ist eine <code>SKILL.md</code>-Datei im Verzeichnis <code>.claude/skills/</code>. Sie enth&auml;lt Anweisungen, die Claude Code automatisch befolgt, wenn bestimmte Trigger-W&ouml;rter erkannt werden. Der Skill <code>obsidian-vault-query</code> bringt Claude Code bei, sema direkt aufzurufen.</p>
+
+        <h3>Skill-Dateien und Pfade</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Datei</th>
+                    <th>Pfad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Skill-Definition</td>
+                    <td><code>.claude/skills/obsidian-vault-query/SKILL.md</code></td>
+                </tr>
+                <tr>
+                    <td>sema CLI</td>
+                    <td><code>tools/sema/cli.ts</code></td>
+                </tr>
+                <tr>
+                    <td>sema Datenbank</td>
+                    <td><code>~/.local/share/sema/sema.db</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Trigger-W&ouml;rter</h3>
+
+        <p>Der Skill wird automatisch aktiviert, wenn du in Claude Code sagst:</p>
+
+        <ul>
+            <li>&bdquo;Was haben wir zu...&ldquo;</li>
+            <li>&bdquo;Finde alles &uuml;ber...&ldquo;</li>
+            <li>&bdquo;sema search...&ldquo;</li>
+            <li>&bdquo;Durchsuche den Vault nach...&ldquo;</li>
+            <li>&bdquo;Welche Notizen gibt es zu...&ldquo;</li>
+        </ul>
+
+        <h3>Verf&uuml;gbare Befehle</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Befehl</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sema search "query"</code></td>
+                    <td>Semantische Suche (Standard)</td>
+                </tr>
+                <tr>
+                    <td><code>sema search "query" --hybrid</code></td>
+                    <td>Hybride Suche (Vektor + FTS5). Achtung: Bindestriche in Suchbegriffen k&ouml;nnen FTS5-Fehler verursachen.</td>
+                </tr>
+                <tr>
+                    <td><code>sema related /pfad/datei.md</code></td>
+                    <td>Findet &auml;hnliche Dateien zu einer gegebenen Datei</td>
+                </tr>
+                <tr>
+                    <td><code>sema status</code></td>
+                    <td>Zeigt Index-Status (Dateien, Chunks, DB-Gr&ouml;&szlig;e)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Score-Logik</h3>
+
+        <div class="info-box">
+            <strong>Niedriger Score = besser!</strong> Der Score ist eine <em>Distanz</em>, nicht eine &Auml;hnlichkeit. <code>&lt; 0.85</code> = sehr relevant, <code>0.85&ndash;1.0</code> = relevant, <code>&gt; 1.0</code> = m&ouml;glicherweise nicht relevant.
+        </div>
+
+        <h3>Workflow</h3>
+
+        <ol>
+            <li>Du fragst Claude Code: &bdquo;Was haben wir zu Wardley Maps?&ldquo;</li>
+            <li>Claude erkennt den Trigger und ruft <code>sema search "Wardley Maps"</code> auf</li>
+            <li>sema liefert Ergebnisse mit Scores und Pfaden</li>
+            <li>Claude liest die relevantesten Dateien und fasst zusammen</li>
+        </ol>
+
+        <h3>Shell-Funktion vs. Claude Code Skill</h3>
+
+        <div class="mermaid-wrapper">
+            <pre class="mermaid">
+flowchart TD
+    USER["Du"] --> CHOICE{"Wie willst du&lt;br/&gt;sema nutzen?"}
+    CHOICE -->|"Interaktiv im Terminal&lt;br/&gt;mit Dateiauswahl + Fabric"| SHELL["sema-claude&lt;br/&gt;&lt;i&gt;Shell-Funktion&lt;/i&gt;"]
+    CHOICE -->|"Direkt in Claude Code&lt;br/&gt;per Sprache"| SKILL["obsidian-vault-query&lt;br/&gt;&lt;i&gt;Claude Code Skill&lt;/i&gt;"]
+    SHELL --> FZF["fzf: Dateien waehlen"]
+    FZF --> FABRIC["Fabric Pattern waehlen"]
+    FABRIC --> CLAUDE1["Claude Code&lt;br/&gt;mit vollem Prompt"]
+    SKILL --> TRIGGER["Trigger: 'was haben wir zu...'"]
+    TRIGGER --> SEMA2["Claude ruft sema CLI auf"]
+    SEMA2 --> CLAUDE2["Claude zeigt Ergebnisse&lt;br/&gt;+ analysiert direkt"]
+            </pre>
+            <p class="mermaid-caption">Abb. 4: Shell-Funktion vs. Claude Code Skill &mdash; Zwei Wege, ein Werkzeug</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Aspekt</th>
+                    <th>Shell-Funktion (<code>sema-claude</code>)</th>
+                    <th>Claude Code Skill</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Aufruf</strong></td>
+                    <td>Im Terminal: <code>sema-claude "query"</code></td>
+                    <td>In Claude Code: &bdquo;Was haben wir zu...&ldquo;</td>
+                </tr>
+                <tr>
+                    <td><strong>Dateiauswahl</strong></td>
+                    <td>Interaktiv mit fzf (Tab + Enter)</td>
+                    <td>Claude w&auml;hlt automatisch</td>
+                </tr>
+                <tr>
+                    <td><strong>Fabric Patterns</strong></td>
+                    <td>28 kuratierte + alle 239 durchsuchbar</td>
+                    <td>Nicht verf&uuml;gbar (direkte Analyse)</td>
+                </tr>
+                <tr>
+                    <td><strong>Kontrolle</strong></td>
+                    <td>Volle Kontrolle &uuml;ber Dateien + Pattern</td>
+                    <td>Claude entscheidet automatisch</td>
+                </tr>
+                <tr>
+                    <td><strong>Geschwindigkeit</strong></td>
+                    <td>3&ndash;4 Interaktionsschritte</td>
+                    <td>Ein Satz gen&uuml;gt</td>
+                </tr>
+                <tr>
+                    <td><strong>Ideal f&uuml;r</strong></td>
+                    <td>Gezielte Analyse mit bestimmtem Framework</td>
+                    <td>Schnelle Recherche, &Uuml;berblick</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- Section 11: Anhang - Vollstaendiger Quellcode    -->
+        <!-- ════════════════════════════════════════════════ -->
+        <h2 id="anhang-quellcode">Anhang: Vollst&auml;ndiger Quellcode</h2>
+
+        <p>Der komplette Quellcode der <code>sema-claude</code>-Funktion (Version 2.0.0, 251 Zeilen).</p>
+
+        <details>
+            <summary>sema-claude.zsh &mdash; Vollst&auml;ndiger Quellcode (251 Zeilen)</summary>
+<pre class="language-bash"><code># sema-claude - Semantic Search → Claude Code Pipeline (Fabric-Powered)
+# Version: 2.0.0
+# Changelog:
+#   v2.0.0 (18.02.2026) - Fabric AI Patterns statt simple Aktionen, 28 kuratierte Patterns in 7 Kategorien, system.md als Claude-Prompt
+#   v1.3.0 (18.02.2026) - Fix: SEMA_CLI als Array statt String (zsh word-splitting)
+#   v1.2.0 (18.02.2026) - Debug-Modus, stderr→stdout, robustere Erkennung
+#   v1.1.0 (18.02.2026) - Fix: robusteres Parsing, bessere Preview
+#   v1.0.0 (18.02.2026) - Initial: 2-stufiger Workflow sema → fzf → claude
+
+sema-claude() {
+  local -a SEMA_CLI=(bun /Users/holgergelhausen/PAI/PAI_DIRECTORY/tools/sema/cli.ts)
+  local TOP=20
+  local DEBUG=false
+  local PATTERNS_DIR="$HOME/.config/fabric/patterns"
+  [[ "$1" == "--debug" ]] &amp;&amp; { DEBUG=true; shift; }
+
+  # Stufe 1: Suchbegriff
+  local query="${1:-}"
+  if [[ -z "$query" ]]; then
+    printf "\033[1;36m🔍 Semantic Search → Claude Code (Fabric AI)\033[0m\n"
+    printf "Suchbegriff: "
+    read -r query
+    [[ -z "$query" ]] &amp;&amp; { echo "Abgebrochen."; return 1; }
+  fi
+
+  # Suche ausfuehren
+  printf "\033[0;33m⏳ Suche nach \"%s\" ...\033[0m\n" "$query"
+  local raw_output
+  raw_output=$("${SEMA_CLI[@]}" search "$query" --top "$TOP" 2&gt;&amp;1)
+  local exit_code=$?
+
+  $DEBUG &amp;&amp; printf "[DEBUG] exit_code=%s, output_length=%s\n" "$exit_code" "${#raw_output}"
+  $DEBUG &amp;&amp; echo "[DEBUG] First 3 lines:" &amp;&amp; echo "$raw_output" | head -3
+
+  if [[ -z "$raw_output" ]] || [[ ${#raw_output} -lt 10 ]]; then
+    echo "❌ Keine Ausgabe von sema CLI (exit: $exit_code)"
+    return 1
+  fi
+
+  local file_lines
+  file_lines=$(echo "$raw_output" | sed -n 's/^[[:space:]]*[0-9]*\.[[:space:]]*\(\[.*\]\)/\1/p')
+
+  if [[ -z "$file_lines" ]]; then
+    echo "❌ Konnte Ergebnisse nicht parsen."
+    return 1
+  fi
+
+  local count=$(echo "$file_lines" | wc -l | tr -d ' ')
+  printf "\033[0;32m✅ %s Treffer\033[0m\n\n" "$count"
+
+  # Stufe 1b: Dateien waehlen mit fzf
+  local selected
+  selected=$(echo "$file_lines" | fzf \
+    --multi \
+    --prompt="Tab=markieren, Enter=fertig &gt; " \
+    --header="🔍 \"$query\" — $count Treffer" \
+    --preview='f=$(echo {} | sed "s/^\[.*\] //"); head -40 "$f" 2&gt;/dev/null || echo "Keine Preview"' \
+    --preview-window=right:50%:wrap \
+    --height=80% \
+    --border=rounded)
+
+  [[ -z "$selected" ]] &amp;&amp; { echo "Abgebrochen."; return 1; }
+
+  local paths
+  paths=$(echo "$selected" | sed 's/^\[.*\] //')
+  local selected_count=$(echo "$paths" | wc -l | tr -d ' ')
+  printf "\n\033[0;32m📄 %s Datei(en) gewählt\033[0m\n\n" "$selected_count"
+
+  # Stufe 2: Fabric Pattern waehlen
+  local -a CURATED=(
+    "── ANALYSIEREN &amp; ERKLÄREN ───│"
+    "extract_wisdom               │ Weisheit, Ideen, Zitate, Gewohnheiten extrahieren"
+    "extract_insights             │ Die 10 überraschendsten Kernerkenntnisse"
+    "analyze_prose                │ Schreibqualität bewerten + Verbesserungsvorschläge"
+    "analyze_claims               │ Behauptungen auf Wahrheit prüfen (A-F Rating)"
+    "analyze_paper                │ Wissenschaftliche Rigor-Analyse"
+    "analyze_presentation         │ Präsentation reviewen und kritisch bewerten"
+    "analyze_tech_impact          │ Technologie-Impact auf Gesellschaft analysieren"
+    "find_logical_fallacies       │ Logikfehler und Fehlschlüsse finden"
+    "explain_docs                 │ Dokumentation verständlich erklären"
+    "explain_terms                │ Glossar aller wichtigen Begriffe erstellen"
+    "rate_content                 │ Inhalt bewerten + Qualitäts-Rating (1-10)"
+    "── ZUSAMMENFASSEN ───────────│"
+    "summarize                    │ 1-Satz-Summary + 10 Hauptpunkte + 5 Takeaways"
+    "create_summary               │ Strukturierte Markdown-Zusammenfassung"
+    "create_5_sentence_summary    │ 5-Satz-Zusammenfassung"
+    "extract_core_message         │ Kernbotschaft auf den Punkt"
+    "── VERGLEICHEN ──────────────│"
+    "compare_and_contrast         │ Markdown-Tabelle: Gemeinsamkeiten &amp; Unterschiede"
+    "── CONTENT ERSTELLEN ────────│"
+    "write_essay                  │ Essay im Paul-Graham-Stil"
+    "create_keynote               │ Keynote/Präsentation erstellen"
+    "write_micro_essay            │ Micro-Essay (&lt; 300 Wörter)"
+    "improve_writing              │ Text überarbeiten: Klarheit, Kohärenz, Stil"
+    "enrich_blog_post             │ Blog-Post anreichern und verbessern"
+    "create_newsletter_entry      │ Newsletter-Abschnitt erstellen"
+    "── EXTRAHIEREN ──────────────│"
+    "extract_ideas                │ 20-50 überraschende Ideen"
+    "extract_recommendations      │ Handlungsempfehlungen"
+    "extract_questions            │ Offene Fragen identifizieren"
+    "create_tags                  │ Tags und Kategorien generieren"
+    "── LERNEN ───────────────────│"
+    "create_flash_cards           │ Lernkarten für Schlüsselkonzepte"
+    "create_quiz                  │ Quiz-Fragen zum Inhalt generieren"
+    "── CUSTOM ──────────────────-│"
+    "FREIE_FRAGE                  │ Eigene Frage an Claude Code"
+    "ALLE_PATTERNS                │ Alle 239 Fabric Patterns durchsuchen"
+  )
+
+  local choice
+  choice=$(printf '%s\n' "${CURATED[@]}" | fzf \
+    --prompt="Pattern wählen &gt; " \
+    --header="🧠 Fabric AI Pattern für Claude Code" \
+    --preview='p=$(echo {} | awk "{print \$1}");
+              f="'"$PATTERNS_DIR"'/$p/system.md";
+              if [[ -f "$f" ]]; then
+                printf "\033[1;33m── %s ──\033[0m\n\n" "$p"
+                head -30 "$f"
+              else
+                echo "📂 Kategorie-Header"
+              fi' \
+    --preview-window=right:50%:wrap \
+    --height=80% \
+    --border=rounded \
+    --no-multi)
+
+  [[ -z "$choice" ]] &amp;&amp; { echo "Abgebrochen."; return 1; }
+
+  local pattern
+  pattern=$(echo "$choice" | awk '{print $1}')
+
+  if [[ "$pattern" == "──" ]]; then
+    echo "⚠️ Kategorie-Header, kein Pattern."
+    return 1
+  fi
+
+  local action=""
+  if [[ "$pattern" == "FREIE_FRAGE" ]]; then
+    printf "\033[1;36mDeine Frage:\033[0m "
+    read -r action
+    [[ -z "$action" ]] &amp;&amp; { echo "Abgebrochen."; return 1; }
+  fi
+
+  if [[ "$pattern" == "ALLE_PATTERNS" ]]; then
+    pattern=$(ls "$PATTERNS_DIR" | fzf \
+      --prompt="Pattern suchen &gt; " \
+      --header="🔍 Alle Fabric Patterns durchsuchen" \
+      --preview='f="'"$PATTERNS_DIR"'/{}/system.md";
+                if [[ -f "$f" ]]; then
+                  printf "\033[1;33m── {} ──\033[0m\n\n"
+                  head -30 "$f"
+                else
+                  echo "Keine system.md gefunden"
+                fi' \
+      --preview-window=right:50%:wrap \
+      --height=80% \
+      --border=rounded \
+      --no-multi)
+    [[ -z "$pattern" ]] &amp;&amp; { echo "Abgebrochen."; return 1; }
+  fi
+
+  local file_list=""
+  while IFS= read -r p; do
+    file_list+="- $p"$'\n'
+  done &lt;&lt;&lt; "$paths"
+
+  local prompt=""
+
+  if [[ -n "$action" ]]; then
+    prompt="$action
+
+Basierend auf diesen Dateien (semantische Suche: \"$query\"):
+
+$file_list
+Lies bitte zuerst alle Dateien und arbeite dann die Aufgabe ab. Antworte auf Deutsch."
+  else
+    local pattern_file="$PATTERNS_DIR/$pattern/system.md"
+    if [[ ! -f "$pattern_file" ]]; then
+      echo "❌ Pattern-Datei nicht gefunden: $pattern_file"
+      return 1
+    fi
+
+    local system_prompt
+    system_prompt=$(cat "$pattern_file")
+
+    prompt="SPRACHE: Deine gesamte Ausgabe MUSS auf Deutsch sein. Uebersetze ALLE englischen Section-Header ins Deutsche.
+
+Du folgst diesem Analyse-Framework:
+
+---
+$system_prompt
+---
+
+Wende dieses Framework auf folgende Dateien an (semantische Suche: \"$query\"):
+
+$file_list
+Lies bitte zuerst alle Dateien vollstaendig und arbeite dann das Framework systematisch auf Deutsch ab."
+  fi
+
+  printf "\n\033[1;36m━━━ Claude Code Prompt ━━━\033[0m\n"
+  if [[ -n "$action" ]]; then
+    printf "\033[0;33mModus:\033[0m Freie Frage\n"
+    printf "\033[0;33mFrage:\033[0m %s\n" "$action"
+  else
+    printf "\033[0;33mPattern:\033[0m %s\n" "$pattern"
+    printf "\033[0;33mQuelle:\033[0m %s\n" "$PATTERNS_DIR/$pattern/system.md"
+  fi
+  printf "\033[0;33mDateien:\033[0m %s\n" "$selected_count"
+  printf "\033[0;33mSuche:\033[0m \"%s\"\n" "$query"
+  printf "\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\n"
+
+  if [[ ${#prompt} -gt 500 ]]; then
+    echo "${prompt:0:300}"
+    printf "\n\033[0;90m... (%s Zeichen, inkl. system.md) ...\033[0m\n\n" "${#prompt}"
+    echo "${prompt: -150}"
+  else
+    echo "$prompt"
+  fi
+
+  printf "\n\033[1;32mEnter\033[0m = Starten, \033[1;31mCtrl+C\033[0m = Abbrechen "
+  read -r
+
+  printf "\n\033[0;33m🚀 Starte Claude Code mit Fabric Pattern \"%s\"...\033[0m\n" "${pattern:-custom}"
+  claude "$prompt"
+}</code></pre>
+        </details>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer class="page-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="https://raw.githubusercontent.com/HolgerGelhausen/ai-performance-academy-assets/main/logo-400-transparent.png" alt="AIPA Logo">
+            <span>AI Performance Academy</span>
+        </div>
+        <div class="footer-meta">
+            sema-claude v2.0 &mdash; 18.02.2026 &mdash; Version 2.0.0
+        </div>
+        <a href="https://ai-pa.de">ai-pa.de</a>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCRIPTS                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<!-- Prism.js Core + Bash -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+
+<!-- Mermaid.js -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            primaryColor: '#F7F8FA',
+            primaryTextColor: '#1F1F1F',
+            primaryBorderColor: '#D9DDE3',
+            lineColor: '#767D8C',
+            secondaryColor: '#FFFFFF',
+            tertiaryColor: '#F7F8FA',
+            fontFamily: 'Montserrat, sans-serif'
+        }
+    });
+</script>
+
+<!-- Mobile TOC Toggle -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tocToggle = document.getElementById('tocToggle');
+        var toc = document.getElementById('toc');
+
+        if (tocToggle && toc) {
+            tocToggle.addEventListener('click', function() {
+                toc.classList.toggle('mobile-open');
+                tocToggle.textContent = toc.classList.contains('mobile-open') ? '\u2715' : '\u2630';
+            });
+
+            // Close TOC when a link is clicked (mobile)
+            var tocLinks = toc.querySelectorAll('a');
+            tocLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 900) {
+                        toc.classList.remove('mobile-open');
+                        tocToggle.textContent = '\u2630';
+                    }
+                });
+            });
+        }
+
+        // Active TOC link on scroll
+        var sections = document.querySelectorAll('h2[id]');
+        var navLinks = document.querySelectorAll('.toc a');
+
+        function updateActiveTocLink() {
+            var scrollPos = window.scrollY + 40;
+            var currentSection = '';
+
+            sections.forEach(function(section) {
+                if (section.offsetTop <= scrollPos) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(function(link) {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveTocLink);
+        updateActiveTocLink();
+    });
+</script>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!-- Version: 4.1.0 -->
+<!-- Version: 4.2.0 -->
 <!-- Changelog:
+  v4.2.0 (18.02.2026) - Logo: 72px in 84px Nav, kein Ueberlappen
   v4.1.0 (18.02.2026) - Logo: cropped-Version, 3x groesser (108px), Nav-Hoehe angepasst
   v4.0.0 (18.02.2026) - Komplett-Redesign: sema-claude Layout mit Fixed Nav, Sidebar TOC, Scroll-Spy, Mobile Toggle
   v3.0.0 (18.02.2026) - Logo oben rechts absolut, HD-Logo, Schrift deutlich groesser
@@ -52,7 +53,7 @@
 
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 136px;
+            scroll-padding-top: 100px;
         }
 
         body {
@@ -75,7 +76,7 @@
             background: var(--aipa-weiss);
             border-bottom: 1px solid var(--aipa-sekundaer-hell);
             box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-            height: 120px;
+            height: 84px;
         }
 
         .top-nav-inner {
@@ -96,7 +97,7 @@
         }
 
         .top-nav-logo img {
-            height: 108px;
+            height: 72px;
             width: auto;
         }
 
@@ -120,7 +121,7 @@
 
         /* ── Hero Section ── */
         .hero {
-            margin-top: 120px;
+            margin-top: 84px;
             background: linear-gradient(180deg, var(--aipa-weiss) 0%, var(--aipa-hellgrau) 100%);
             padding: 4rem 1.5rem 3rem;
             text-align: center;
@@ -205,7 +206,7 @@
             width: 260px;
             flex-shrink: 0;
             position: sticky;
-            top: 136px;
+            top: 100px;
             align-self: flex-start;
             max-height: calc(100vh - 100px);
             overflow-y: auto;
@@ -544,7 +545,7 @@
             .toc {
                 display: none;
                 position: fixed;
-                top: 120px;
+                top: 84px;
                 left: 0;
                 right: 0;
                 bottom: 0;
@@ -1679,7 +1680,7 @@ obs-f</code></pre>
             <span>AI Performance Academy</span>
         </div>
         <div class="footer-meta">
-            obs-f v5.8.0 &mdash; 18.02.2026 &mdash; Version 4.1.0
+            obs-f v5.8.0 &mdash; 18.02.2026 &mdash; Version 4.2.0
         </div>
         <a href="../">&larr; Alle Vortr&auml;ge</a>
     </div>
